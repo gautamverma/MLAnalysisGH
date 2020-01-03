@@ -16,7 +16,6 @@ from sklearn.metrics import mean_squared_error
 from sklearn.compose import ColumnTransformer
 from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 
@@ -27,7 +26,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 # TODO To resolve this we need put the columns in same order and intialize the old columns 
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
-CHUNKSIZE = 100000
+CHUNKSIZE = 1000000
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:

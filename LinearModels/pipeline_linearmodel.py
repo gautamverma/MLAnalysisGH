@@ -8,13 +8,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
+from sklearn.datasets import fetch_openml
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_squared_error
+from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 
 # This will only use the Label Encoder as on using the one hot encoding 
 # we have to guarantee all the values in that one-hot-column has to present 
@@ -23,7 +25,7 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 # TODO To resolve this we need put the columns in same order and intialize the old columns 
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
-CHUNKSIZE = 100000
+CHUNKSIZE = 1000000
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:
