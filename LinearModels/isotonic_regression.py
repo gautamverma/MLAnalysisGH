@@ -41,15 +41,15 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 
 def imputeMissingCols(df, numericCols, categoricalCols):
 	for col in numericCols:
-		print(pd.isnull(df.iloc[:,col]).all())
-		if not pd.isnull(df.iloc[:,col]).all():
+		print(pd.isnull(df.iloc[:,col]).any())
+		if pd.isnull(df.iloc[:,col]).any():
 			numericImputer = SimpleImputer(missing_values=np.nan, strategy='median')
 			numericImputer.fit(df.iloc[:,col:col+1])	
 			df.iloc[:,col:col+1] = numericImputer.transform(df.iloc[:,col:col+1])
 
 	for col in categoricalCols:
-		print(pd.isnull(df.iloc[:,col]).all())
-		if not pd.isnull(df.iloc[:,col]).all():
+		print(pd.isnull(df.iloc[:,col]).any())
+		if pd.isnull(df.iloc[:,col]).any():
 			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
 			categoricalImputer.fit(df.iloc[:,col:col+1])
 			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
