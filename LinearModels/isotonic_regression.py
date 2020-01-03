@@ -133,9 +133,9 @@ def trainModel():
 		# We create the preprocessing pipelines for both numeric and categorical data
 		categoricalCols = ['created_by_x', 'merchant_id', 'slot_names',
 							'container_type', 'language_code', 'component_name', 'component_namespace',
-							'site', 'weblab', 'bullseye', 'container_id']
+							'site', 'weblab', 'container_id']
 
-		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
+		numericCols = ['guarantee_percentage', 'bullseye', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		numeric_transformer = Pipeline(steps=[
     		('imputer', SimpleImputer(strategy='median')),
