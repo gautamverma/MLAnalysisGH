@@ -1,7 +1,7 @@
 import sys
 import pickle
-import datetime
 import logging
+import datetime
 
 import pandas as pd
 import numpy as np
@@ -15,7 +15,6 @@ from sklearn.datasets import fetch_openml
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_squared_error
 from sklearn.compose import ColumnTransformer
-from sklearn.isotonic import IsotonicRegression
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
@@ -35,7 +34,6 @@ CHUNKSIZE = 1000000
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:
 		raise RuntimeError("Column can't be null. Please give the column value")
-
 	return pd.merge(df1, df2, on=column, how=joinType);
 
 
@@ -91,9 +89,16 @@ def loadDatasets(cleanDF):
 		metrics_df3  = cleanDataframe(metrics_df3)
 
 	metrics_df4 = pd.read_csv('/data/s3_file/'+PLACEMENT_PROPERTIES_FILENAME, skiprows=0, header=None)
-	metrics_df4.columns = ['frozen_placement_id', 'container_type', 'container_id', 'slot_names', 'merchant_id', 'site', 'weblab', 'bullseye', 'is_recognized', 'parent_browse_nodes', 'store_names','start_date', 'end_date']
+	metrics_df4.columns = ['frozen_placement_id', 'container_type', 'container_id', 'slot_names', 'merchant_id',
+	 'site', 'weblab', 'bullseye', 'is_recognized', 'parent_browse_nodes', 'store_names','start_date', 'end_date']
+
+	 # Decreased the file Size
+	metrics_df4  = metrics_df4['frozen_placement_id', 'container_type', 'container_id', 
+				'slot_names', 'merchant_id', 'site','start_date', 'end_date'] 
+	
 	if cleanDF:
 		metrics_df4  = cleanDataframe(metrics_df4)
+	logging.info("Datafile loaded and cleaned")
 	return metrics_df1, metrics_df2, metrics_df3, metrics_df4;
 
 def labelCategoryColumns(df, cols):
@@ -105,15 +110,16 @@ def labelCategoryColumns(df, cols):
 
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val):
-	filename =  '/data/models/xg_reg_model_02_01_2020_{}_{}.sav'
-	filename  = filename.format(learning_rate_val, max_depth_val) 
+	filename =  '/data/models/xg_reg_model_02_01_2020_{}_{}_{}.sav'
+	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
 	pickle.dump(xg_reg, open(filename, 'wb'))
+	logging.info("Model training complete and model is saved")
 
 def trainModel():
 	df1, df2, df3, df4 = loadDatasets(True)
 	training_data_file = '/data/s3_file/3_10_files/full_metrics'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
-		
+		logging.info("Starting chunk processing")
 		chunk.columns = ['frozen_placement_id', 'impressions', 'metrics_hour']
 
 		#format the timestamp columns
@@ -136,12 +142,12 @@ def trainModel():
 
 		columns_to_keep = ['impressions', 'created_by_x', 'merchant_id', 'slot_names', 
 			'container_type', 'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
-			'site', 'weblab', 'bullseye', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
+			'site', 'weblab', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		# We create the preprocessing pipelines for both numeric and categorical data
 		categoricalCols = ['created_by_x', 'merchant_id', 'slot_names',
 							'container_type', 'language_code', 'component_name', 'component_namespace',
-							'site', 'weblab', 'container_id']
+							'site', 'weblab', 'bullseye', 'container_id']
 
 		numericCols = ['guarantee_percentage', 'bullseye', 'days_interval', 'hours_interval', 'seconds_interval']
 
@@ -160,12 +166,12 @@ def trainModel():
         		('cat', categorical_transformer, categoricalCols)])
 
 		clf = Pipeline(steps=[('preprocessor', preprocessor),
-                			('classifier', IsotonicRegression())])
+						('classifier', LinearRegression())])
 
 		df_merged_set = df_merged_set[columns_to_keep]
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
 		clf.fit(X, Y)
-	saveModel(clf, 'isotonic', 0)
+	saveModel(clf, 0, 0)
 
 
 def __main__():

@@ -1,5 +1,6 @@
 import sys
 import pickle
+import logging
 import datetime
 
 import pandas as pd
@@ -18,6 +19,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 
+# Log time-level and message for getting a running estimate
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
+
 # This will only use the Label Encoder as on using the one hot encoding 
 # we have to guarantee all the values in that one-hot-column has to present 
 # in the test dataset also otherwise it will result in the feature mismatch bug
@@ -30,7 +34,6 @@ CHUNKSIZE = 1000000
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:
 		raise RuntimeError("Column can't be null. Please give the column value")
-
 	return pd.merge(df1, df2, on=column, how=joinType);
 
 
@@ -87,6 +90,8 @@ def loadDatasets(cleanDF):
 
 	metrics_df4 = pd.read_csv('/data/s3_file/'+PLACEMENT_PROPERTIES_FILENAME, skiprows=0, header=None)
 	metrics_df4.columns = ['frozen_placement_id', 'container_type', 'container_id', 'slot_names', 'merchant_id', 'site', 'weblab', 'bullseye', 'is_recognized', 'parent_browse_nodes', 'store_names','start_date', 'end_date']
+	
+	
 	if cleanDF:
 		metrics_df4  = cleanDataframe(metrics_df4)
 	return metrics_df1, metrics_df2, metrics_df3, metrics_df4;

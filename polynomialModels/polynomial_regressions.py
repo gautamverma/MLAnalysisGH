@@ -1,5 +1,6 @@
 import sys
 import pickle
+import logging
 import datetime
 
 import pandas as pd
@@ -19,6 +20,8 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 
+# Log time-level and message for getting a running estimate
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Config Data
 DATA_BASE_DIRECTORY = '/Users/gautamve/workspace/'

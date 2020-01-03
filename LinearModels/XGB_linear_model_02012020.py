@@ -1,5 +1,6 @@
 import sys
 import pickle
+import logging
 import datetime
 
 import pandas as pd
@@ -15,6 +16,8 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
+# Log time-level and message for getting a running estimate
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
 
 # This will only use the Label Encoder as on using the one hot encoding 
 # we have to guarantee all the values in that one-hot-column has to present 
