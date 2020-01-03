@@ -95,8 +95,8 @@ def loadDatasets(cleanDF):
 	 'site', 'weblab', 'bullseye', 'is_recognized', 'parent_browse_nodes', 'store_names','start_date', 'end_date']
 	
 	 # Decreased the file Size
-	metrics_df4  = metrics_df4['frozen_placement_id', 'container_type', 'container_id', 
-				'slot_names', 'merchant_id', 'site','start_date', 'end_date'] 
+	metrics_df4  = metrics_df4[['frozen_placement_id', 'container_type', 'container_id', 
+				'slot_names', 'merchant_id', 'site','start_date', 'end_date']] 
 	if cleanDF:
 		metrics_df4  = cleanDataframe(metrics_df4)
 	return metrics_df1, metrics_df2, metrics_df3, metrics_df4;
