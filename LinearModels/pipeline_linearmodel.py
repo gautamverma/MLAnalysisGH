@@ -91,7 +91,7 @@ def loadDatasets(cleanDF):
 	metrics_df4 = pd.read_csv('/data/s3_file/'+PLACEMENT_PROPERTIES_FILENAME, skiprows=0, header=None)
 	metrics_df4.columns = ['frozen_placement_id', 'container_type', 'container_id', 'slot_names', 'merchant_id', 'site', 'weblab', 'bullseye', 'is_recognized', 'parent_browse_nodes', 'store_names','start_date', 'end_date']
 	
-	
+
 	if cleanDF:
 		metrics_df4  = cleanDataframe(metrics_df4)
 	return metrics_df1, metrics_df2, metrics_df3, metrics_df4;
@@ -136,12 +136,12 @@ def trainModel():
 
 		columns_to_keep = ['impressions', 'created_by_x', 'merchant_id', 'slot_names', 
 			'container_type', 'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
-			'site', 'weblab', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
+			'site', 'weblab', 'bullseye', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		# We create the preprocessing pipelines for both numeric and categorical data
 		categoricalCols = ['created_by_x', 'merchant_id', 'slot_names',
 							'container_type', 'language_code', 'component_name', 'component_namespace',
-							'site', 'weblab', 'bullseye', 'container_id']
+							'site', 'weblab', 'container_id']
 
 		numericCols = ['guarantee_percentage', 'bullseye', 'days_interval', 'hours_interval', 'seconds_interval']
 
