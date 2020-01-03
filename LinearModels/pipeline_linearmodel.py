@@ -151,11 +151,12 @@ def trainModel():
         		('cat', categorical_transformer, categoricalCols)])
 
 		clf = Pipeline(steps=[('preprocessor', preprocessor),
-                      ('classifier', LinearRegression())])
+						('to_dense', DenseTransformer()),
+						('classifier', LinearRegression())])
 
 		df_merged_set = df_merged_set[columns_to_keep]
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
-		clf.fit(X.to_numpy(), Y.to_numpy())
+		clf.fit(X, Y)
 	saveModel(clf, 0, 0)
 
 
