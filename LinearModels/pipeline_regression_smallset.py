@@ -148,7 +148,7 @@ def trainModel():
 			'site', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		# We create the preprocessing pipelines for both numeric and categorical data
-		categoricalCols = ['created_by_x', 'merchant_id', 'slot_names',
+		categoricalCols = ['created_by_x', 'merchant_id', 'slot_names', 'container_id'
 							'container_type', 'language_code', 'component_name', 'component_namespace',
 							'site', 'container_id']
 

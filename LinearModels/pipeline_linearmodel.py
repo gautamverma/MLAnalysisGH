@@ -134,7 +134,7 @@ def trainModel():
 		df_merged_set['hours_interval'] = deltaTime.total_seconds()/3600
 		df_merged_set['seconds_interval']  = deltaTime.total_seconds()
 
-		columns_to_keep = ['impressions', 'created_by_x', 'merchant_id', 'slot_names', 
+		columns_to_keep = ['impressions', 'created_by_x', 'merchant_id', 'slot_names',
 			'container_type', 'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
 			'site', 'weblab', 'bullseye', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
 
