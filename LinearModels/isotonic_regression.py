@@ -156,7 +156,7 @@ def trainModel():
 
 		df_merged_set = df_merged_set[columns_to_keep]
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
-		clf.fit(X, Y)
+		clf.fit(X.toarray(), Y)
 	saveModel(clf, 'isotonic', 0)
 
 
