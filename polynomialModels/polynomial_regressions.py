@@ -46,7 +46,6 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 
 
 def imputeMissingCols(df, numericCols, categoricalCols):
-	print(numericCols, categoricalCols)
 	for col in numericCols:
 		print(pd.isnull(df.iloc[:,col]).all())
 		if not pd.isnull(df.iloc[:,col]).all():

@@ -37,14 +37,18 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 
 def imputeMissingCols(df, numericCols, categoricalCols):
 	for col in numericCols:
-		numericImputer = SimpleImputer(missing_values=np.nan, strategy='median')
-		numericImputer.fit(df.iloc[:,col:col+1])	
-		df.iloc[:,col:col+1] = numericImputer.transform(df.iloc[:,col:col+1])
+		print(pd.isnull(df.iloc[:,col]).all())
+		if not pd.isnull(df.iloc[:,col]).all():
+			numericImputer = SimpleImputer(missing_values=np.nan, strategy='median')
+			numericImputer.fit(df.iloc[:,col:col+1])	
+			df.iloc[:,col:col+1] = numericImputer.transform(df.iloc[:,col:col+1])
 
 	for col in categoricalCols:
-		categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
-		categoricalImputer.fit(df.iloc[:,col:col+1])
-		df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
+		print(pd.isnull(df.iloc[:,col]).all())
+		if not pd.isnull(df.iloc[:,col]).all():
+			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+			categoricalImputer.fit(df.iloc[:,col:col+1])
+			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
 	return df;
 
 
@@ -102,7 +106,7 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val):
 	pickle.dump(xg_reg, open(filename, 'wb'))
 
 def trainModel():
-	df1, df2, df3, df4 = loadDatasets(False)
+	df1, df2, df3, df4 = loadDatasets(True)
 	training_data_file = '/data/s3_file/3_10_files/full_metrics'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		
@@ -152,7 +156,6 @@ def trainModel():
         		('cat', categorical_transformer, categoricalCols)])
 
 		clf = Pipeline(steps=[('preprocessor', preprocessor),
-							('to_dense', DenseTransformer()),
                 			('classifier', IsotonicRegression())])
 
 		df_merged_set = df_merged_set[columns_to_keep]
