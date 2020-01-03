@@ -36,7 +36,7 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 		raise RuntimeError("Column can't be null. Please give the column value")
 	return pd.merge(df1, df2, on=column, how=joinType);
 
-
+# Here the cateogrical is constant for faster check
 def imputeMissingCols(df, numericCols, categoricalCols):
 	for col in numericCols:
 		print(pd.isnull(df.iloc[:,col]).all())
@@ -48,7 +48,7 @@ def imputeMissingCols(df, numericCols, categoricalCols):
 	for col in categoricalCols:
 		print(pd.isnull(df.iloc[:,col]).all())
 		if not pd.isnull(df.iloc[:,col]).all():
-			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_value='B1B1B1B1B1')
 			categoricalImputer.fit(df.iloc[:,col:col+1])
 			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
 	return df;
@@ -75,6 +75,9 @@ def loadDatasets(cleanDF):
 	# Make sure you download these file in the backed EC2 instance
 	metrics_df1 = pd.read_csv('/data/s3_file/'+PlACEMENTS__FILENAME, skiprows=0, header=None)
 	metrics_df1.columns = ['frozen_placement_id', 'frozen_content_id', 'guarantee_percentage', 'created_by']
+	# for null guarantee fill the explicitely 0
+	if 'guarantee_percentage' in metrics_df1.columns:
+		metrics_df1 = metrics_df1.replace(np.nan, 0)
 	if cleanDF:
 		metrics_df1  = cleanDataframe(metrics_df1)
 
@@ -110,7 +113,7 @@ def labelCategoryColumns(df, cols):
 
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val):
-	filename =  '/data/models/xg_reg_model_02_01_2020_{}_{}_{}.sav'
+	filename =  '/data/models/linear_regression_small_set_02_01_2020_{}_{}_{}.sav'
 	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
 	pickle.dump(xg_reg, open(filename, 'wb'))
 	logging.info("Model training complete and model is saved")

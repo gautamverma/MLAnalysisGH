@@ -37,16 +37,19 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 
 def imputeMissingCols(df, numericCols, categoricalCols):
 	for col in numericCols:
-		numericImputer = SimpleImputer(missing_values=np.nan, strategy='median')
-		numericImputer.fit(df.iloc[:,col:col+1])	
-		df.iloc[:,col:col+1] = numericImputer.transform(df.iloc[:,col:col+1])
+		print(pd.isnull(df.iloc[:,col]).all())
+		if not pd.isnull(df.iloc[:,col]).all():
+			numericImputer = SimpleImputer(missing_values=np.nan, strategy='median')
+			numericImputer.fit(df.iloc[:,col:col+1])	
+			df.iloc[:,col:col+1] = numericImputer.transform(df.iloc[:,col:col+1])
 
 	for col in categoricalCols:
-		categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
-		categoricalImputer.fit(df.iloc[:,col:col+1])
-		df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
+		print(pd.isnull(df.iloc[:,col]).all())
+		if not pd.isnull(df.iloc[:,col]).all():
+			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+			categoricalImputer.fit(df.iloc[:,col:col+1])
+			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
 	return df;
-
 
 def cleanDataframe(df):
 	datatypes = list(df.dtypes.iteritems())
@@ -69,6 +72,10 @@ def loadDatasets():
 	# Make sure you download these file in the backed EC2 instance
 	metrics_df1 = pd.read_csv('/data/s3_file/'+PlACEMENTS__FILENAME, skiprows=0, header=None)
 	metrics_df1.columns = ['frozen_placement_id', 'frozen_content_id', 'guarantee_percentage', 'created_by']
+	# for null guarantee fill the explicitely 0
+	if 'guarantee_percentage' in metrics_df1.columns:
+		metrics_df1 = metrics_df1.replace(np.nan, 0)
+
 	metrics_df1  = cleanDataframe(metrics_df1)
 
 	metrics_df2 = pd.read_csv('/data/s3_file/'+CONTENT_FILENAME, skiprows=0, header=None)

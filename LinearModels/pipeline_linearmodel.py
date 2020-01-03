@@ -36,7 +36,6 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 		raise RuntimeError("Column can't be null. Please give the column value")
 	return pd.merge(df1, df2, on=column, how=joinType);
 
-
 def imputeMissingCols(df, numericCols, categoricalCols):
 	for col in numericCols:
 		print(pd.isnull(df.iloc[:,col]).all())
@@ -52,7 +51,6 @@ def imputeMissingCols(df, numericCols, categoricalCols):
 			categoricalImputer.fit(df.iloc[:,col:col+1])
 			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
 	return df;
-
 
 def cleanDataframe(df):
 	datatypes = list(df.dtypes.iteritems())
@@ -75,6 +73,9 @@ def loadDatasets(cleanDF):
 	# Make sure you download these file in the backed EC2 instance
 	metrics_df1 = pd.read_csv('/data/s3_file/'+PlACEMENTS__FILENAME, skiprows=0, header=None)
 	metrics_df1.columns = ['frozen_placement_id', 'frozen_content_id', 'guarantee_percentage', 'created_by']
+	# for null guarantee fill the explicitely 0
+	if 'guarantee_percentage' in metrics_df1.columns:
+		metrics_df1 = metrics_df1.replace(np.nan, 0)
 	if cleanDF:
 		metrics_df1  = cleanDataframe(metrics_df1)
 
@@ -98,15 +99,14 @@ def loadDatasets(cleanDF):
 
 def labelCategoryColumns(df, cols):
 	label_encoder = LabelEncoder()
-
 	for col in cols:
 		df.loc[:,col] = label_encoder.fit_transform(df.loc[:,col]).astype('int64')
 	return df;	
 
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val):
-	filename =  '/data/models/xg_reg_model_02_01_2020_{}_{}.sav'
-	filename  = filename.format(learning_rate_val, max_depth_val) 
+	filename =  '/data/models/linear_regression_02_01_2020_{}_{}_{}.sav'
+	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp()))
 	pickle.dump(xg_reg, open(filename, 'wb'))
 
 def trainModel():

@@ -110,8 +110,8 @@ def labelCategoryColumns(df, cols):
 
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val):
-	filename =  '/data/models/xg_reg_model_02_01_2020_{}_{}.sav'
-	filename  = filename.format(learning_rate_val, max_depth_val) 
+	filename =  '/data/models/isotonic_regression_small_set_02_01_2020_{}_{}_{}.sav'
+	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp()))
 	pickle.dump(xg_reg, open(filename, 'wb'))
 
 def trainModel():
