@@ -1,3 +1,6 @@
+# This import is for the tensorflow and required to first line
+from __future__ import absolute_import, division, print_function, unicode_literals
+
 import sys
 import pickle
 import logging
@@ -15,9 +18,6 @@ from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
-
-# This import is for the tensorflow
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 # Log time-level and message for getting a running estimate
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -53,8 +53,8 @@ def generateCategoricalData(df, categoricalCols):
 	# It generates the numrical values for the categories where nan is assigned -1 and 
 	# others start with 0 
 	for col in categoricalCols:
-		df.iloc[:,col] = pd.Cateogrical(df.iloc[:,col])
-		df.iloc[:,col] = df.iloc[:,col].cat.codes
+		df[col] = pd.Categorical(df[col])
+		df[col] = df[col].cat.codes
 	return df
 
 
@@ -69,9 +69,6 @@ def cleanDataframe(df):
 		else:
 			categoricalCols.append(i)
 			cColNames.append(datatypes[i][0])
-	logging.info("Numeric Columns", str(iColNames))
-	logging.info("Category Columns", str(cColNames))
-	df = generateCategoricalData(df, categoricalCols)
 	return imputeMissingCols(df, numericCols);
 
 
@@ -183,6 +180,9 @@ def trainModel():
 		categoricalCols = ['created_by_x', 'merchant_id', 'slot_names',
 							'container_type', 'language_code', 'component_name', 'component_namespace',
 							'site', 'container_id']
+
+		# Now map the categorical data
+		df_merged_set = generateCategoricalData(df_merged_set, categoricalCols)
 
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
 
