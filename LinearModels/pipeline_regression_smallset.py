@@ -39,30 +39,38 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 # Here the cateogrical is constant for faster check
 def imputeMissingCols(df, numericCols, categoricalCols):
 	for col in numericCols:
-		print(pd.isnull(df.iloc[:,col]).any())
-		if pd.isnull(df.iloc[:,col]).any():
+		isNullPresent = pd.isnull(df.iloc[:,col]).any() 
+		logging.info(isNullPresent)
+		if isNullPresent:
 			numericImputer = SimpleImputer(missing_values=np.nan, strategy='median')
 			numericImputer.fit(df.iloc[:,col:col+1])	
 			df.iloc[:,col:col+1] = numericImputer.transform(df.iloc[:,col:col+1])
+			logging.info("Imputer complete for integer column")
 
 	for col in categoricalCols:
-		print(pd.isnull(df.iloc[:,col]).any())
-		if pd.isnull(df.iloc[:,col]).any():
+		isNullPresent = pd.isnull(df.iloc[:,col]).any() 
+		logging.info(isNullPresent)
+		if isNullPresent:
 			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_value='B1B1B1B1B1')
 			categoricalImputer.fit(df.iloc[:,col:col+1])
 			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
+			logging.info("Imputer complete for category column")
 	return df;
 
 
 def cleanDataframe(df):
 	datatypes = list(df.dtypes.iteritems())
-	categoricalCols, numericCols = [], []
+	categoricalCols, numericCols, iColNames, cColNames = [], [], [], []
 	for  i in range(len(datatypes)):
 		str_dtype = str(datatypes[i][1])
 		if str_dtype.startswith('int') or str_dtype.startswith('float'):
 			numericCols.append(i)
+			iColNames.append(datatypes[i][0])
 		else:
 			categoricalCols.append(i)
+			cColNames.append(datatypes[i][0])
+	logging.info("Numeric Columns", iColNames)
+	logging.info("Category Columns", cColNames)
 	return imputeMissingCols(df, numericCols, categoricalCols);
 
 
@@ -79,16 +87,19 @@ def loadDatasets(cleanDF):
 	if 'guarantee_percentage' in metrics_df1.columns:
 		metrics_df1 = metrics_df1.replace(np.nan, 0)
 	if cleanDF:
+		logging.info("Cleaning dataframe df1")
 		metrics_df1  = cleanDataframe(metrics_df1)
 
 	metrics_df2 = pd.read_csv('/data/s3_file/'+CONTENT_FILENAME, skiprows=0, header=None)
 	metrics_df2.columns = ['frozen_content_id', 'component_name', 'component_namespace', 'created_by']
 	if cleanDF:
+		logging.info("Cleaning dataframe df2")
 		metrics_df2  = cleanDataframe(metrics_df2)
 
 	metrics_df3 = pd.read_csv('/data/s3_file/'+RESOURCEBUNDLE_FILENAME, skiprows=0, header=None)
 	metrics_df3.columns = ['frozen_content_id', 'language_code']
 	if cleanDF:
+		logging.info("Cleaning dataframe df3")
 		metrics_df3  = cleanDataframe(metrics_df3)
 
 	metrics_df4 = pd.read_csv('/data/s3_file/'+PLACEMENT_PROPERTIES_FILENAME, skiprows=0, header=None)
@@ -100,10 +111,12 @@ def loadDatasets(cleanDF):
 				'slot_names', 'merchant_id', 'site','start_date', 'end_date']]
 	
 	if cleanDF:
+		logging.info("Cleaning dataframe df4")
 		metrics_df4  = cleanDataframe(metrics_df4)
 	logging.info("Datafile loaded and cleaned")
 	return metrics_df1, metrics_df2, metrics_df3, metrics_df4;
 
+#This is used to encode the Y
 def labelCategoryColumns(df, cols):
 	label_encoder = LabelEncoder()
 
@@ -155,12 +168,10 @@ def trainModel():
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		numeric_transformer = Pipeline(steps=[
-    		('imputer', SimpleImputer(strategy='median')),
     		('scaler', StandardScaler())])
 
 
 		categorical_transformer = Pipeline(steps=[
-    		('imputer', SimpleImputer(strategy='constant', fill_value='missing')),
     		('onehot', OneHotEncoder(handle_unknown='ignore'))])
 
 		preprocessor = ColumnTransformer(
