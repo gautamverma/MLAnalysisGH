@@ -5,22 +5,17 @@ import datetime
 
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.datasets import fetch_openml
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_squared_error
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
 
 # Log time-level and message for getting a running estimate
-logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # This will only use the Label Encoder as on using the one hot encoding 
 # we have to guarantee all the values in that one-hot-column has to present 
@@ -75,6 +70,7 @@ def cleanDataframe(df):
 
 
 def loadDatasets(cleanDF):
+	logging.info("Start loading the Datasets")
 	PlACEMENTS__FILENAME = '3_10_files/3_10NovemberDS_Placementfeature000'
 	CONTENT_FILENAME = '3_10_files/3_10NovemberDS_Contentfeature000'
 	RESOURCEBUNDLE_FILENAME = '3_10_files/3_10NovemberDS_Bundlefeature000'
@@ -84,6 +80,7 @@ def loadDatasets(cleanDF):
 	metrics_df1 = pd.read_csv('/data/s3_file/'+PlACEMENTS__FILENAME, skiprows=0, header=None)
 	metrics_df1.columns = ['frozen_placement_id', 'frozen_content_id', 'guarantee_percentage', 'created_by']
 	# for null guarantee fill the explicitely 0
+	logging.info("guarantee null to explicit 0")
 	if 'guarantee_percentage' in metrics_df1.columns:
 		metrics_df1 = metrics_df1.replace(np.nan, 0)
 	if cleanDF:
