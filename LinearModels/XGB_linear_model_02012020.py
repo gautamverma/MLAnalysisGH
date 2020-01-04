@@ -32,7 +32,6 @@ CHUNKSIZE = 5000000
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is not None:
 		raise RuntimeError("Column can't be null. Please give the column value")
-
 	return pd.merge(df1, df2, on=column, how=joinType);
 
 
@@ -108,6 +107,14 @@ def labelCategoryColumns(df, cols):
 		df.loc[:,col] = label_encoder.fit_transform(df.loc[:,col]).astype('int64')
 	return df;	
 
+def generateCategoricalData(df, categoricalCols):
+	# It generates the numrical values for the categories where nan is assigned -1 and 
+	# others start with 0 
+	for col in categoricalCols:
+		df[col] = pd.Categorical(df[col])
+		df[col] = df[col].cat.codes
+	return df
+
 def saveModel(xg_reg, label_encoder, learning_rate_val, max_depth_val):
 	filename =  '/data/models/XGB_MODEL_{}_{}_{}.sav'
 	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
@@ -136,10 +143,10 @@ def trainModel(learning_rate_val, max_depth_val):
 		df4['start_date'] =  pd.to_datetime(df4['start_date'], format='%Y %m %d %H:%M:%S')
 		df4['end_date'] =  pd.to_datetime(df4['end_date'], format='%Y %m %d %H:%M:%S')
 
-		df_merged = mergeDataframe(chunk, df1, 'frozen_placement_id')
-		df_merged = mergeDataframe(df_merged, df2, 'frozen_content_id')
-		df_merged = mergeDataframe(df_merged, df2, 'frozen_content_id')
-		df_merged = mergeDataframe(df_merged, df2, 'frozen_placement_id')
+		df_merged_set = mergeDataframe(chunk, df1, 'frozen_placement_id')
+		df_merged_set = mergeDataframe(df_merged_set, df2, 'frozen_content_id')
+		df_merged_set = mergeDataframe(df_merged_set, df3, 'frozen_content_id')
+		df_merged_set = mergeDataframe(df_merged_set, df4, 'frozen_placement_id')
 
 		# Generate the days and hour interval time gaps
 		deltaTime = (df_merged_set['metrics_hour'] - df_merged_set['start_date']).dt
@@ -154,8 +161,8 @@ def trainModel(learning_rate_val, max_depth_val):
 		categoricalCols = [ 'created_by_x', 'merchant_id', 'slot_names', 'container_type', 'language_code',
 							 'component_name', 'component_namespace', 'site', 'container_id']
 
-		df_merged = labelCategoryColumns(df_merged, categoricalCols)
-		X, Y = df_merged.iloc[:,1:], df_merged_set.iloc[:,0]
+		df_merged_set = generateCategoricalData(df_merged, categoricalCols)
+		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
 
 		# Classifier Declared 
 		xg_reg = xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = learning_rate_val, 
