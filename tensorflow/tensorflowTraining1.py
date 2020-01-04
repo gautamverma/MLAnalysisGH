@@ -193,7 +193,6 @@ def trainModel():
 		dataset = tf.data.Dataset.from_tensor_slices((X.values, Y.values))
 		for feat, targ in dataset.take(5):
   			logging.info('Features: {}, Target: {}'.format(feat, targ))
-
   		model.fit(train_dataset, epochs=15)
 
   	# Save the model to the disk for later usage
