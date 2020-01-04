@@ -64,8 +64,8 @@ def cleanDataframe(df):
 		else:
 			categoricalCols.append(i)
 			cColNames.append(datatypes[i][0])
-	logging.info("Numeric Columns", iColNames)
-	logging.info("Category Columns", cColNames)
+	logging.info("Numeric Columns", str(iColNames))
+	logging.info("Category Columns", str(cColNames))
 	return imputeMissingCols(df, numericCols, categoricalCols);
 
 
