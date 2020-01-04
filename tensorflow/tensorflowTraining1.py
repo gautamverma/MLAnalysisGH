@@ -186,14 +186,13 @@ def trainModel():
 
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
 
-		
 		df_merged_set = df_merged_set[columns_to_keep]
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
 		
 		dataset = tf.data.Dataset.from_tensor_slices((X.values, Y.values))
 		for feat, targ in dataset.take(5):
   			logging.info('Features: {}, Target: {}'.format(feat, targ))
-  		model.fit(train_dataset, epochs=15)
+		model.fit(train_dataset, epochs=15)
 
   	# Save the model to the disk for later usage
 	saveModel(model, 0, 0)
