@@ -26,7 +26,8 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # TODO To resolve this we need put the columns in same order and intialize the old columns 
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
-CHUNKSIZE = 100000
+# Batch size of 5M
+CHUNKSIZE = 5000000
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is not None:
@@ -36,19 +37,23 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 
 
 def imputeMissingCols(df, numericCols, categoricalCols):
+	logging.info("Starting the imputer for a dataframe")
 	for col in numericCols:
-		print(pd.isnull(df.iloc[:,col]).all())
-		if not pd.isnull(df.iloc[:,col]).all():
+		isNullPresent = pd.isnull(df.iloc[:,col]).any() 
+		logging.info(isNullPresent)
+		if isNullPresent:
 			numericImputer = SimpleImputer(missing_values=np.nan, strategy='median')
 			numericImputer.fit(df.iloc[:,col:col+1])	
 			df.iloc[:,col:col+1] = numericImputer.transform(df.iloc[:,col:col+1])
 
 	for col in categoricalCols:
-		print(pd.isnull(df.iloc[:,col]).all())
-		if not pd.isnull(df.iloc[:,col]).all():
+		isNullPresent = pd.isnull(df.iloc[:,col]).any() 
+		logging.info(isNullPresent)
+		if isNullPresent:
 			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
 			categoricalImputer.fit(df.iloc[:,col:col+1])
 			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
+	logging.info("Running of the imputer for a dataframe completed")		
 	return df;
 
 def cleanDataframe(df):
@@ -64,6 +69,7 @@ def cleanDataframe(df):
 
 
 def loadDatasets():
+	logging.info("Starting the loading of the datasets")
 	PlACEMENTS__FILENAME = '3_10_files/3_10NovemberDS_Placementfeature000'
 	CONTENT_FILENAME = '3_10_files/3_10NovemberDS_Contentfeature000'
 	RESOURCEBUNDLE_FILENAME = '3_10_files/3_10NovemberDS_Bundlefeature000'
@@ -88,32 +94,45 @@ def loadDatasets():
 
 	metrics_df4 = pd.read_csv('/data/s3_file/'+PLACEMENT_PROPERTIES_FILENAME, skiprows=0, header=None)
 	metrics_df4.columns = ['frozen_placement_id', 'container_type', 'container_id', 'slot_names', 'merchant_id', 'site', 'weblab', 'bullseye', 'is_recognized', 'parent_browse_nodes', 'store_names','start_date', 'end_date']
+	
+	# Removing the some misssing datasets to reduce running time
+	metrics_df4  = metrics_df4[['frozen_placement_id', 'container_type', 'container_id', 
+				'slot_names', 'merchant_id', 'site','start_date', 'end_date']]
+
 	metrics_df4  = cleanDataframe(metrics_df4)
+	logging.info("Dataset cleaned and loaded")
 	return metrics_df1, metrics_df2, metrics_df3, metrics_df4;
 
 def labelCategoryColumns(df, cols):
-	label_encoder = LabelEncoder()
-
 	for col in cols:
 		df.loc[:,col] = label_encoder.fit_transform(df.loc[:,col]).astype('int64')
 	return df;	
 
-
-def saveModel(xg_reg, learning_rate_val, max_depth_val):
-	filename =  '/data/models/xg_reg_model_02_01_2020_{}_{}.sav'
-	filename  = filename.format(learning_rate_val, max_depth_val) 
+def saveModel(xg_reg, label_encoder, learning_rate_val, max_depth_val):
+	filename =  '/data/models/XGB_MODEL_{}_{}_{}.sav'
+	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
 	pickle.dump(xg_reg, open(filename, 'wb'))
+
+	filename =  '/data/models/XGB_LABEL_{}_{}_{}.sav'
+	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
+	pickle.dump(label_encoder, open(filename, 'wb'))	
+	logging.info("training complete and model is saved")
 
 def trainModel(learning_rate_val, max_depth_val):
 
+	chunkcount = 1
+	label_encoder = LabelEncoder()
 	df1, df2, df3, df4 = loadDatasets()
 	training_data_file = '/data/s3_file/3_10_files/full_metrics'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
-		
+		logging.info("Start chunk Processing - " + str(chunkcount))
+		chunkcount = chunkcount + 1 
 		chunk.columns = ['frozen_placement_id', 'impressions', 'metrics_hour']
 
 		#format the timestamp columns
 		chunk['metrics_hour'] = pd.to_datetime(chunk['metrics_hour'], format='%Y %m %d %H:%M:%S')
+		chunk['metrics_hour'] = chunk['metrics_hour'].dt.tz_localize(None)
+		
 		df4['start_date'] =  pd.to_datetime(df4['start_date'], format='%Y %m %d %H:%M:%S')
 		df4['end_date'] =  pd.to_datetime(df4['end_date'], format='%Y %m %d %H:%M:%S')
 
@@ -128,13 +147,12 @@ def trainModel(learning_rate_val, max_depth_val):
 		df_merged_set['hours_interval'] = deltaTime.total_seconds()/3600
 		df_merged_set['seconds_interval']  = deltaTime.total_seconds()
 
-		columns_to_keep = ['impressions', 'frozen_placement_id', 'created_by_x', 'merchant_id', 'slot_names', 
+		columns_to_keep = ['impressions', 'created_by_x', 'merchant_id', 'slot_names', 
 			'container_type', 'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
-			'site', 'weblab', 'bullseye', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
+			'site', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
 
-		categoricalCols = ['frozen_placement_id', 'created_by_x', 'merchant_id', 'slot_names',
-							'container_type', 'language_code', 'component_name', 'component_namespace',
-							'site', 'weblab', 'bullseye', 'container_id']
+		categoricalCols = [ 'created_by_x', 'merchant_id', 'slot_names', 'container_type', 'language_code',
+							 'component_name', 'component_namespace', 'site', 'container_id']
 
 		df_merged = labelCategoryColumns(df_merged, categoricalCols)
 		X, Y = df_merged.iloc[:,1:], df_merged_set.iloc[:,0]
@@ -143,7 +161,7 @@ def trainModel(learning_rate_val, max_depth_val):
 		xg_reg = xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = learning_rate_val, 
     	                     max_depth = max_depth_val, alpha = 5, n_estimators = 10)
 		xg_reg.fit(X, Y)
-		saveModel(xg_reg, learning_rate_val, max_depth_val)
+		saveModel(xg_reg, label_encoder, learning_rate_val, max_depth_val)
 
 def __main__():
 	# count the arguments
