@@ -115,7 +115,7 @@ def generateCategoricalData(df, categoricalCols):
 		df[col] = df[col].cat.codes
 	return df
 
-def loadCategorialList(base_folder, columnNm)
+def loadCategorialList(base_folder, columnNm):
 	map_file = base_folder + columnNm + "_map.dict"
 	if not path.exists(map_file):
 		raise RuntimeError("Map file missing for "+ columnNm + " name")
@@ -126,7 +126,6 @@ def loadCategorialList(base_folder, columnNm)
 	return column_series, column_series.tolist()
 
 def fillLabelFromFile(df, columnNm, column_series):
-
 	df[columnNm +"_label"] = column_series[df[columnNm]]
 	df = df.drop([columnNm], axis=1)
 	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
@@ -198,11 +197,11 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		# label container_id separately as too high cardinality
-		df_merged_set, labelCols[0] + '_list' = fillLabelFromFile(df_merged_set, labelCols[0])
+		df_merged_set = fillLabelFromFile(df_merged_set, labelCols[0])
 		df_merged_set[labelCols[0]] = df_merged_set[labelCols[0]]/df_merged_set[labelCols[0]].max()
 		
 		for col in categoricalCols:
-			df_merged_set, labelList = fillLabelFromFile(df_merged_set, col, categorySeries[col])
+			df_merged_set = fillLabelFromFile(df_merged_set, col, categorySeries[col])
 
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
 		one_hot_encoded = one_hot_encoder.transform(X[categoricalCols])
