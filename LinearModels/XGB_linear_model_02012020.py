@@ -195,6 +195,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 			'site', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		labelCols = ['container_id']
+		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		# label container_id separately as too high cardinality
 		df_merged_set, labelCols[0] + '_list' = fillLabelFromFile(df_merged_set, labelCols[0])
@@ -204,7 +205,9 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 			df_merged_set, labelList = fillLabelFromFile(df_merged_set, col, categorySeries[col])
 
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
-		X = one_hot_encoder.transform(X)
+		one_hot_encoded = one_hot_encoder.transform(X[categoricalCols])
+		# Drop the ctegorical columns 
+		X = pd.concat([X[labelCols + numericCols], one_hot_encoded], axis=1)
 		
 		xg_reg.fit(X, Y)
 	saveModel(xg_reg, label_encoder, learning_rate_val, max_depth_val)
