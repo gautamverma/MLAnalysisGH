@@ -115,6 +115,24 @@ def generateCategoricalData(df, categoricalCols):
 		df[col] = df[col].cat.codes
 	return df
 
+def loadCategorialList(base_folder, columnNm)
+	map_file = base_folder + columnNm + "_map.dict"
+	if not path.exists(map_file):
+		raise RuntimeError("Map file missing for "+ columnNm + " name")
+
+	column_dict_file = open(map_file, "rb")
+	column_dict = pickle.load(column_dict_file)
+	column_series = pd.Series(column_dict)
+	return column_series, column_series.tolist()
+
+def fillLabelFromFile(df, columnNm, column_series):
+
+	df[columnNm +"_label"] = column_series[df[columnNm]]
+	df = df.drop([columnNm], axis=1)
+	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
+	return  df
+
+
 def saveModel(xg_reg, label_encoder, learning_rate_val, max_depth_val):
 	filename =  '/data/models/XGB_MODEL_{}_{}_{}.sav'
 	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
@@ -125,11 +143,29 @@ def saveModel(xg_reg, label_encoder, learning_rate_val, max_depth_val):
 	pickle.dump(label_encoder, open(filename, 'wb'))	
 	logging.info("training complete and model is saved")
 
-def trainModel(learning_rate_val, max_depth_val):
+def loadModel(learning_rate_val, max_depth_val):
+	# Classifier Declared 
+	xg_reg = xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = learning_rate_val, 
+                         max_depth = max_depth_val, alpha = 5, n_estimators = 10)
+
+def trainModel(learning_rate_val, max_depth_val, base_folder):
 
 	chunkcount = 1
-	label_encoder = LabelEncoder()
 	df1, df2, df3, df4 = loadDatasets()
+	
+	xg_reg = loadModel(learning_rate_val, max_depth_val)
+
+	#Load the categorical columns for faster filling in between
+	categoricalCols = [ 'merchant_id', 'slot_names', 'container_type', 'language_code',
+							 'component_name', 'component_namespace', 'site']
+	categorySeries, categoryLists = {}, []
+	for col in categoricalCols:
+		tempSeries, tempList = loadCategorialList(base_folder, columnNm)
+		categoryLists.append(tempList)
+		categorySeries[col] = tempSeries
+
+	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore')	
+
 	training_data_file = '/data/s3_file/3_10_files/full_metrics'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		logging.info("Start chunk Processing - " + str(chunkcount))
@@ -159,25 +195,25 @@ def trainModel(learning_rate_val, max_depth_val):
 			'site', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		labelCols = ['container_id']
-		categoricalCols = [ 'merchant_id', 'slot_names', 'container_type', 'language_code',
-							 'component_name', 'component_namespace', 'site']
 
-		df_merged_set = generateCategoricalData(df_merged, labelCols)
+		# label container_id separately as too high cardinality
+		df_merged_set, labelCols[0] + '_list' = fillLabelFromFile(df_merged_set, labelCols[0])
+		df_merged_set[labelCols[0]] = df_merged_set[labelCols[0]]/df_merged_set[labelCols[0]].max()
 		
+		for col in categoricalCols:
+			df_merged_set, labelList = fillLabelFromFile(df_merged_set, col, categorySeries[col])
 
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
-
-		# Classifier Declared 
-		xg_reg = xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = learning_rate_val, 
-    	                     max_depth = max_depth_val, alpha = 5, n_estimators = 10)
+		X = one_hot_encoder.transform(X)
+		
 		xg_reg.fit(X, Y)
-		saveModel(xg_reg, label_encoder, learning_rate_val, max_depth_val)
+	saveModel(xg_reg, label_encoder, learning_rate_val, max_depth_val)
 
 def __main__():
 	# count the arguments
-	if len(sys.argv) < 3:
-		raise RuntimeError("Please provode the learning_rate and max_depth")
-	trainModel(sys.argv[1], sys.argv[2])
+	if len(sys.argv) < 4:
+		raise RuntimeError("Please provode the learning_rate, max_depth and base folder")
+	trainModel(sys.argv[1], sys.argv[2], sys.argv[3])
 
 #This is required to call the main function
 if __name__ == "__main__":

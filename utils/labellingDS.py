@@ -24,10 +24,9 @@ def generateLabel(folder , columnNm):
 
 	df[columnNm] = pd.Categorical(df[columnNm])
 	df[columnNm + '_label'] = df[columnNm].cat.codes	
-	df = df.set_index(columnNm)
-	print(df.head()) 
-	pickle.dump(df.to_dict('index'), open(map_file, 'wb'))
-	return df[columnNm + '_label']
+	print(df.head())
+	column_series = pd.Series(df[columnNm + '_label'].values, index=df[columnNm]) 
+	pickle.dump(column_series.to_dict(), open(map_file, 'wb'))
 
 def __main__():
 	# count the arguments
