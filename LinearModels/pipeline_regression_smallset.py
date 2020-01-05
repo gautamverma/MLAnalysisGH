@@ -158,6 +158,10 @@ def trainModel():
 			'site', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		# We create the preprocessing pipelines for both numeric and categorical data
+		#  created_by_x is not a useful information and its not the exhaustive set
+
+		# merchant_id -- find the grouging and find a way to assign a way for new merchant_id
+		# 
 		categoricalCols = ['created_by_x', 'merchant_id', 'slot_names',
 							'container_type', 'language_code', 'component_name', 'component_namespace',
 							'site', 'container_id']
