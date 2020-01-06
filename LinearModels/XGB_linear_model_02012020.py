@@ -3,6 +3,7 @@ import pickle
 import logging
 import datetime
 
+from os import path
 import pandas as pd
 import numpy as np
 import xgboost as xgb
@@ -28,9 +29,10 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 
 # Batch size of 5M
 CHUNKSIZE = 5000000
+CONSTANT_FILLER = 'unknown_flag'
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
-	if column is not None:
+	if column is None:
 		raise RuntimeError("Column can't be null. Please give the column value")
 	return pd.merge(df1, df2, on=column, how=joinType);
 
@@ -49,7 +51,8 @@ def imputeMissingCols(df, numericCols, categoricalCols):
 		isNullPresent = pd.isnull(df.iloc[:,col]).any() 
 		logging.info(isNullPresent)
 		if isNullPresent:
-			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+			# Can't use the most_frequest in 10M+ Series as it takes very long time to update it
+			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_values=CONSTANT_FILLER)
 			categoricalImputer.fit(df.iloc[:,col:col+1])
 			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
 	logging.info("Running of the imputer for a dataframe completed")		
@@ -65,7 +68,6 @@ def cleanDataframe(df):
 		else:
 			categoricalCols.append(i)
 	return imputeMissingCols(df, numericCols, categoricalCols);
-
 
 def loadDatasets(cleanDframe):
 	logging.info("Starting the loading of the datasets")
@@ -130,7 +132,12 @@ def loadCategorialList(base_folder, columnNm):
 	return column_series, column_series.tolist()
 
 def fillLabelFromFile(df, columnNm, column_series):
-	df[columnNm +"_label"] = column_series[df[columnNm]]
+	for index, row in df1.iterrows():
+		if row[columnNm] in column_series:
+			df.loc[index, columnNm +'_label'] = column_series[row[columnNm]]
+		else:
+			# Add -1 for unknown values
+			df.loc[index, columnNm +'_label'] = -1	
 	df = df.drop([columnNm], axis=1)
 	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
 	return  df
@@ -205,6 +212,8 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		columns_to_keep = ['impressions', 'merchant_id', 'slot_names', 
 			'container_type', 'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
 			'site', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
+
+		df_merged_set = df_merged_set[columns_to_keep]	
 		# Remove language is data is not cleaned
 		if not cleanDframe:
 			columns_to_keep.remove('language_code')
@@ -213,7 +222,8 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
 
 		# label container_id separately as too high cardinality
-		df_merged_set = fillLabelFromFile(df_merged_set, labelCols[0])
+		container__id_series, container_id_list = loadCategorialList(base_folder, labelCols[0])
+		df_merged_set = fillLabelFromFile(df_merged_set, labelCols[0], container__id_series)
 		df_merged_set[labelCols[0]] = df_merged_set[labelCols[0]]/df_merged_set[labelCols[0]].max()
 		
 		for col in categoricalCols:

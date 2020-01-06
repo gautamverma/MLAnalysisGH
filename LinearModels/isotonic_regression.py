@@ -25,12 +25,13 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # TODO To resolve this we need put the columns in same order and intialize the old columns 
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
-CHUNKSIZE = 1000000
+# Batch size of 5M
+CHUNKSIZE = 5000000
+CONSTANT_FILLER = 'unknown_flag'
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:
 		raise RuntimeError("Column can't be null. Please give the column value")
-
 	return pd.merge(df1, df2, on=column, how=joinType);
 
 
@@ -47,9 +48,11 @@ def imputeMissingCols(df, numericCols, categoricalCols):
 		isNullPresent = pd.isnull(df.iloc[:,col]).any() 
 		logging.info(isNullPresent)
 		if isNullPresent:
-			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+			# Can't use the most_frequest in 10M+ Series as it takes very long time to update it
+			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_values=CONSTANT_FILLER)
 			categoricalImputer.fit(df.iloc[:,col:col+1])
 			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
+	logging.info("Running of the imputer for a dataframe completed")
 	return df;
 
 
@@ -64,6 +67,26 @@ def cleanDataframe(df):
 			categoricalCols.append(i)
 	return imputeMissingCols(df, numericCols, categoricalCols);
 
+def loadCategorialList(base_folder, columnNm):
+	map_file = base_folder + columnNm + "_map.dict"
+	if not path.exists(map_file):
+		raise RuntimeError("Map file missing for "+ columnNm + " name")
+
+	column_dict_file = open(map_file, "rb")
+	column_dict = pickle.load(column_dict_file)
+	column_series = pd.Series(column_dict)
+	return column_series, column_series.tolist()
+
+def fillLabelFromFile(df, columnNm, column_series):
+	for index, row in df1.iterrows():
+		if row[columnNm] in column_series:
+			df.loc[index, columnNm +'_label'] = column_series[row[columnNm]]
+		else:
+			# Add -1 for unknown values
+			df.loc[index, columnNm +'_label'] = -1	
+	df = df.drop([columnNm], axis=1)
+	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
+	return  df
 
 def loadDatasets(cleanDF):
 	logging.info("Start loading for the datasets")
