@@ -167,7 +167,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		categoricalCols.remove('language_code')
 	categorySeries, categoryLists = {}, []
 	for col in categoricalCols:
-		tempSeries, tempList = loadCategorialList(base_folder, columnNm)
+		tempSeries, tempList = loadCategorialList(base_folder, col)
 		categoryLists.append(tempList)
 		categorySeries[col] = tempSeries
 
