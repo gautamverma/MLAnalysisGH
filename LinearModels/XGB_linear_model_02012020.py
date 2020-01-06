@@ -67,7 +67,7 @@ def cleanDataframe(df):
 	return imputeMissingCols(df, numericCols, categoricalCols);
 
 
-def loadDatasets():
+def loadDatasets(cleanDframe):
 	logging.info("Starting the loading of the datasets")
 	PlACEMENTS__FILENAME = '3_10_files/3_10NovemberDS_Placementfeature000'
 	CONTENT_FILENAME = '3_10_files/3_10NovemberDS_Contentfeature000'
@@ -80,16 +80,18 @@ def loadDatasets():
 	# for null guarantee fill the explicitely 0
 	if 'guarantee_percentage' in metrics_df1.columns:
 		metrics_df1 = metrics_df1.replace(np.nan, 0)
-
-	metrics_df1  = cleanDataframe(metrics_df1)
+	if cleanDframe:
+		metrics_df1  = cleanDataframe(metrics_df1)
 
 	metrics_df2 = pd.read_csv('/data/s3_file/'+CONTENT_FILENAME, skiprows=0, header=None)
 	metrics_df2.columns = ['frozen_content_id', 'component_name', 'component_namespace', 'created_by']
-	metrics_df2  = cleanDataframe(metrics_df2)
+	if cleanDframe:
+		metrics_df2  = cleanDataframe(metrics_df2)
 
 	metrics_df3 = pd.read_csv('/data/s3_file/'+RESOURCEBUNDLE_FILENAME, skiprows=0, header=None)
 	metrics_df3.columns = ['frozen_content_id', 'language_code']
-	metrics_df3  = cleanDataframe(metrics_df3)
+	if cleanDframe:
+		metrics_df3  = cleanDataframe(metrics_df3)
 
 	metrics_df4 = pd.read_csv('/data/s3_file/'+PLACEMENT_PROPERTIES_FILENAME, skiprows=0, header=None)
 	metrics_df4.columns = ['frozen_placement_id', 'container_type', 'container_id', 'slot_names', 'merchant_id', 'site', 'weblab', 'bullseye', 'is_recognized', 'parent_browse_nodes', 'store_names','start_date', 'end_date']
@@ -98,8 +100,10 @@ def loadDatasets():
 	metrics_df4  = metrics_df4[['frozen_placement_id', 'container_type', 'container_id', 
 				'slot_names', 'merchant_id', 'site','start_date', 'end_date']]
 
-	metrics_df4  = cleanDataframe(metrics_df4)
-	logging.info("Dataset cleaned and loaded")
+	if cleanDframe:
+		metrics_df4  = cleanDataframe(metrics_df4)
+
+	logging.info("Dataset cleaned +"str(cleanDframe)"+ and loaded")
 	return metrics_df1, metrics_df2, metrics_df3, metrics_df4;
 
 def labelCategoryColumns(df, cols):
@@ -147,16 +151,20 @@ def loadModel(learning_rate_val, max_depth_val):
 	xg_reg = xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = learning_rate_val, 
                          max_depth = max_depth_val, alpha = 5, n_estimators = 10)
 
-def trainModel(learning_rate_val, max_depth_val, base_folder):
+def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 	chunkcount = 1
-	df1, df2, df3, df4 = loadDatasets()
+	cleanDframe = clean==1? True: False
+	logging.info("Base folder:: clean dataframe "+base_folder+"::"+str(cleanDframe))
+	df1, df2, df3, df4 = loadDatasets(cleanDframe)
 	
 	xg_reg = loadModel(learning_rate_val, max_depth_val)
 
 	#Load the categorical columns for faster filling in between
 	categoricalCols = [ 'merchant_id', 'slot_names', 'container_type', 'language_code',
 							 'component_name', 'component_namespace', 'site']
+	if not cleanDframe:
+		categoricalCols.remove('language_code')
 	categorySeries, categoryLists = {}, []
 	for col in categoricalCols:
 		tempSeries, tempList = loadCategorialList(base_folder, columnNm)
@@ -180,8 +188,13 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 
 		df_merged_set = mergeDataframe(chunk, df1, 'frozen_placement_id')
 		df_merged_set = mergeDataframe(df_merged_set, df2, 'frozen_content_id')
-		df_merged_set = mergeDataframe(df_merged_set, df3, 'frozen_content_id')
+		if not cleanDframe:
+			# If dataframe is not cleaned then do not merge as it has only 1/2 M rows
+			df_merged_set = mergeDataframe(df_merged_set, df3, 'frozen_content_id')
+		
 		df_merged_set = mergeDataframe(df_merged_set, df4, 'frozen_placement_id')
+		if not cleanDframe:
+			df_merged_set = df_merged_set.dropna()
 
 		# Generate the days and hour interval time gaps
 		deltaTime = (df_merged_set['metrics_hour'] - df_merged_set['start_date']).dt
@@ -192,6 +205,9 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 		columns_to_keep = ['impressions', 'merchant_id', 'slot_names', 
 			'container_type', 'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
 			'site', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
+		# Remove language is data is not cleaned
+		if not cleanDframe:
+			columns_to_keep.remove('language_code')
 
 		labelCols = ['container_id']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
@@ -213,9 +229,9 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 
 def __main__():
 	# count the arguments
-	if len(sys.argv) < 4:
-		raise RuntimeError("Please provode the learning_rate, max_depth and base folder")
-	trainModel(sys.argv[1], sys.argv[2], sys.argv[3])
+	if len(sys.argv) < 5:
+		raise RuntimeError("Please provode the learning_rate, max_depth, base folder and cleanDataframe(0/1)")
+	trainModel(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 
 #This is required to call the main function
 if __name__ == "__main__":
