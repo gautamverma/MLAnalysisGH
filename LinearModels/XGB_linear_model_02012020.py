@@ -103,7 +103,7 @@ def loadDatasets(cleanDframe):
 	if cleanDframe:
 		metrics_df4  = cleanDataframe(metrics_df4)
 
-	logging.info("Dataset cleaned +"str(cleanDframe)"+ and loaded")
+	logging.info("Dataset cleaned "+str(cleanDframe)+" and loaded")
 	return metrics_df1, metrics_df2, metrics_df3, metrics_df4;
 
 def labelCategoryColumns(df, cols):
@@ -154,7 +154,7 @@ def loadModel(learning_rate_val, max_depth_val):
 def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 	chunkcount = 1
-	cleanDframe = clean==1? True: False
+	cleanDframe = True if clean==1 else False
 	logging.info("Base folder:: clean dataframe "+base_folder+"::"+str(cleanDframe))
 	df1, df2, df3, df4 = loadDatasets(cleanDframe)
 	
