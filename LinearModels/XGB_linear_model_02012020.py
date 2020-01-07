@@ -129,7 +129,7 @@ def loadCategorialList(base_folder, columnNm):
 	column_dict_file = open(map_file, "rb")
 	column_dict = pickle.load(column_dict_file)
 	column_series = pd.Series(column_dict)
-	return column_series, column_series.tolist()
+	return column_series, list(column_series.index)
 
 def fillLabelFromFile(df, columnNm, column_series):
 	for index, row in df.iterrows():
@@ -175,11 +175,10 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean, language):
 							 'component_name', 'component_namespace', 'site']
 	if not addLanguage:
 		categoricalCols.remove('language_code')
-	categorySeries, categoryLists = {}, []
+	categoryLists = []
 	for col in categoricalCols:
 		tempSeries, tempList = loadCategorialList(base_folder, col)
 		categoryLists.append(tempList)
-		categorySeries[col] = tempSeries
 
 	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore')	
 
@@ -197,12 +196,16 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean, language):
 		df4['end_date'] =  pd.to_datetime(df4['end_date'], format='%Y %m %d %H:%M:%S')
 
 		df_merged_set = mergeDataframe(chunk, df1, 'frozen_placement_id')
+		logging.info("Merged df1")
 		df_merged_set = mergeDataframe(df_merged_set, df2, 'frozen_content_id')
+		logging.info("Merged df2")
 		if addLanguage:
 			# If dataframe is not cleaned then do not merge as it has only 1/2 M rows
 			df_merged_set = mergeDataframe(df_merged_set, df3, 'frozen_content_id')
+			logging.info("Merged df3")
 		
 		df_merged_set = mergeDataframe(df_merged_set, df4, 'frozen_placement_id')
+		logging.info("Merged df4")
 		if not cleanDframe:
 			df_merged_set = df_merged_set.dropna()
 
@@ -211,7 +214,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean, language):
 		df_merged_set['days_interval']  = deltaTime.days
 		df_merged_set['hours_interval'] = deltaTime.total_seconds()/3600
 		df_merged_set['seconds_interval']  = deltaTime.total_seconds()
-
+		logging.info("Time intervals computed")
 		columns_to_keep = ['impressions', 'merchant_id', 'slot_names', 'container_type',
 			'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
 			'site', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
@@ -228,10 +231,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean, language):
 		container__id_series, container_id_list = loadCategorialList(base_folder, labelCols[0])
 		df_merged_set = fillLabelFromFile(df_merged_set, labelCols[0], container__id_series)
 		df_merged_set[labelCols[0]] = df_merged_set[labelCols[0]]/df_merged_set[labelCols[0]].max()
-		
-		for col in categoricalCols:
-			df_merged_set = fillLabelFromFile(df_merged_set, col, categorySeries[col])
-
+		logging.info("container_id categorical attribution done")
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
 		one_hot_encoder.fit(X[categoricalCols])
 		one_hot_encoded = one_hot_encoder.transform(X[categoricalCols])
