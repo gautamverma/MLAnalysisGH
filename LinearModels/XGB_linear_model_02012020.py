@@ -158,10 +158,13 @@ def loadModel(learning_rate_val, max_depth_val):
 	xg_reg = xgb.XGBRegressor(objective ='reg:squarederror', colsample_bytree = 0.3, learning_rate = learning_rate_val, 
                          max_depth = max_depth_val, alpha = 5, n_estimators = 10)
 
-def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
+def trainModel(learning_rate_val, max_depth_val, base_folder, clean, language):
 
 	chunkcount = 1
+	
 	cleanDframe = True if clean=='1' else False
+	addLanguage = True if language=='1' else False
+
 	logging.info("Base folder:: clean dataframe "+base_folder+"::"+str(cleanDframe))
 	df1, df2, df3, df4 = loadDatasets(cleanDframe)
 	
@@ -170,7 +173,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 	#Load the categorical columns for faster filling in between
 	categoricalCols = [ 'merchant_id', 'slot_names', 'container_type', 'language_code',
 							 'component_name', 'component_namespace', 'site']
-	if not cleanDframe:
+	if not addLanguage:
 		categoricalCols.remove('language_code')
 	categorySeries, categoryLists = {}, []
 	for col in categoricalCols:
@@ -195,7 +198,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 		df_merged_set = mergeDataframe(chunk, df1, 'frozen_placement_id')
 		df_merged_set = mergeDataframe(df_merged_set, df2, 'frozen_content_id')
-		if not cleanDframe:
+		if not addLanguage:
 			# If dataframe is not cleaned then do not merge as it has only 1/2 M rows
 			df_merged_set = mergeDataframe(df_merged_set, df3, 'frozen_content_id')
 		
@@ -209,17 +212,15 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		df_merged_set['hours_interval'] = deltaTime.total_seconds()/3600
 		df_merged_set['seconds_interval']  = deltaTime.total_seconds()
 
-		columns_to_keep = ['impressions', 'merchant_id', 'slot_names', 
-			'container_type', 'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
+		columns_to_keep = ['impressions', 'merchant_id', 'slot_names', 'container_type',
+			'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
 			'site', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
-		# Remove the language_code before filtering out the columns
-		if not cleanDframe:
+		# Remove the language_code before filtering out the columns if data is not clean
+		if not addLanguage:
 			columns_to_keep.remove('language_code')
 
 		df_merged_set = df_merged_set[columns_to_keep]	
-		# Remove language is data is not cleaned
 		
-
 		labelCols = ['container_id']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
 
@@ -243,9 +244,9 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 def __main__():
 	# count the arguments
-	if len(sys.argv) < 5:
-		raise RuntimeError("Please provode the learning_rate, max_depth, base folder and cleanDataframe(0/1)")
-	trainModel(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+	if len(sys.argv) < 6:
+		raise RuntimeError("Please provode the learning_rate, max_depth, base folder, cleanDataframe(0/1) and addLanguage")
+	trainModel(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
 
 #This is required to call the main function
 if __name__ == "__main__":
