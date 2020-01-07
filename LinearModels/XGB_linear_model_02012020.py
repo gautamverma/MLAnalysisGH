@@ -132,7 +132,7 @@ def loadCategorialList(base_folder, columnNm):
 	return column_series, column_series.tolist()
 
 def fillLabelFromFile(df, columnNm, column_series):
-	for index, row in df1.iterrows():
+	for index, row in df.iterrows():
 		if row[columnNm] in column_series:
 			df.loc[index, columnNm +'_label'] = column_series[row[columnNm]]
 		else:
@@ -212,11 +212,13 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		columns_to_keep = ['impressions', 'merchant_id', 'slot_names', 
 			'container_type', 'language_code', 'component_name', 'component_namespace', 'guarantee_percentage', 
 			'site', 'container_id', 'days_interval', 'hours_interval', 'seconds_interval']
+		# Remove the language_code before filtering out the columns
+		if not cleanDframe:
+			columns_to_keep.remove('language_code')
 
 		df_merged_set = df_merged_set[columns_to_keep]	
 		# Remove language is data is not cleaned
-		if not cleanDframe:
-			columns_to_keep.remove('language_code')
+		
 
 		labelCols = ['container_id']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval', 'seconds_interval']
