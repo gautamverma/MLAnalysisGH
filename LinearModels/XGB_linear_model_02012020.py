@@ -198,7 +198,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean, language):
 
 		df_merged_set = mergeDataframe(chunk, df1, 'frozen_placement_id')
 		df_merged_set = mergeDataframe(df_merged_set, df2, 'frozen_content_id')
-		if not addLanguage:
+		if addLanguage:
 			# If dataframe is not cleaned then do not merge as it has only 1/2 M rows
 			df_merged_set = mergeDataframe(df_merged_set, df3, 'frozen_content_id')
 		
