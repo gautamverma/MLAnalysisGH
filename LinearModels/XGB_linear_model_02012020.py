@@ -52,7 +52,7 @@ def imputeMissingCols(df, numericCols, categoricalCols):
 		logging.info(isNullPresent)
 		if isNullPresent:
 			# Can't use the most_frequest in 10M+ Series as it takes very long time to update it
-			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_values=CONSTANT_FILLER)
+			categoricalImputer = SimpleImputer(missing_values=np.nan, strategy='constant', fill_value=CONSTANT_FILLER)
 			categoricalImputer.fit(df.iloc[:,col:col+1])
 			df.iloc[:,col:col+1] = categoricalImputer.transform(df.iloc[:,col:col+1])
 	logging.info("Running of the imputer for a dataframe completed")		
@@ -161,7 +161,7 @@ def loadModel(learning_rate_val, max_depth_val):
 def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 	chunkcount = 1
-	cleanDframe = True if clean==1 else False
+	cleanDframe = True if clean=='1' else False
 	logging.info("Base folder:: clean dataframe "+base_folder+"::"+str(cleanDframe))
 	df1, df2, df3, df4 = loadDatasets(cleanDframe)
 	
@@ -230,7 +230,9 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 			df_merged_set = fillLabelFromFile(df_merged_set, col, categorySeries[col])
 
 		X, Y = df_merged_set.iloc[:,1:], df_merged_set.iloc[:,0]
+		one_hot_encoder.fit(X[categoricalCols])
 		one_hot_encoded = one_hot_encoder.transform(X[categoricalCols])
+		logging.info(str(X.size) + " : "+str(X[categoricalCols].size)+" : "+str(one_hot_encoded.size))
 		# Drop the ctegorical columns 
 		X = pd.concat([X[labelCols + numericCols], one_hot_encoded], axis=1)
 		
