@@ -78,7 +78,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 		YColumns = ['impressions']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval']
 		columns_to_keep = YColumns + categoricalCols + numericCols 
-		df_merged_set = df_merged_set[columns_to_keep]	
+		df_merged_set = chunk[columns_to_keep]	
 		
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
