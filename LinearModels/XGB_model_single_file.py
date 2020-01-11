@@ -38,6 +38,16 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val):
 
 	logging.info("training complete and model is saved")
 
+# Load the Labels Vocabulary in One Hot Encoder
+def loadCategorialList(base_folder, columnNm):
+	map_file = base_folder + columnNm + "_map.dict"
+	if not path.exists(map_file):
+		raise RuntimeError("Map file missing for "+ columnNm + " name")
+
+	column_dict_file = open(map_file, "rb")
+	column_dict = pickle.load(column_dict_file)
+	column_series = pd.Series(column_dict)
+	return list(column_series.index)
 
 def trainModel(learning_rate_val, max_depth_val, base_folder):
 		
@@ -63,7 +73,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 	training_data_file = base_folder + '3HourDataFullFile.csv'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		logging.info("Start chunk Processing - " + str(chunkcount))
-		logging.info(columns)
+		logging.info(chunk.columns)
 		
 		YColumns = ['impressions']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval']
