@@ -39,14 +39,8 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val):
 	logging.info("training complete and model is saved")
 
 
-def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
-
-	chunkcount = 1
-	cleanDframe = True if clean=='1' else False
-
-	logging.info("Base folder:: clean dataframe "+base_folder+"::"+str(cleanDframe))
-	df1, df2, df3 = loadDatasets(base_folder, cleanDframe)
-	
+def trainModel(learning_rate_val, max_depth_val, base_folder):
+		
 	learning_params = {
 		'objective' : 'reg:squarederror',
 		'colsample_bytree' : 0.3,
@@ -65,6 +59,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore', sparse=False)	
 
+	chunkcount = 1
 	training_data_file = base_folder + '3HourDataFullFile.csv'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		logging.info("Start chunk Processing - " + str(chunkcount))
@@ -122,9 +117,9 @@ def predict(xgbModel, one_hot_encoder):
 
 def __main__():
 	# count the arguments
-	if len(sys.argv) < 5:
-		raise RuntimeError("Please provode the learning_rate, max_depth, base folder and cleanDataframe(0/1)")
-	trainModel(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+	if len(sys.argv) < 4:
+		raise RuntimeError("Please provode the learning_rate, max_depth and base folder")
+	trainModel(sys.argv[1], sys.argv[2], sys.argv[3])
 
 #This is required to call the main function
 if __name__ == "__main__":
