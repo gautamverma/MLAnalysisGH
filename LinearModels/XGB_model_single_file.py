@@ -122,7 +122,7 @@ def predict(xg_reg, one_hot_encoder, base_folder):
 		dataMatrix = xgb.DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
 		predictions = xg_reg.predict(dataMatrix)
 
-		df = pd.dataframe({'actual': Y, 'predictions': predictions})
+		df = pd.DataFrame({'actual': Y, 'predictions': predictions})
 		logging.info(str(df))
 
 
