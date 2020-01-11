@@ -27,8 +27,8 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # TODO To resolve this we need put the columns in same order and intialize the old columns 
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
-# Batch size of 5M
-CHUNKSIZE = 1
+# Batch size of 10000
+CHUNKSIZE = 10000
 CONSTANT_FILLER = 'unknown_flag'
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
@@ -190,8 +190,8 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 		# Drop the ctegorical columns 	
 		dataMatrix = xgb.DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
-		xgboost.train({}, dataMatrix, 1, xgb_model=xg_reg)
-
+		xgb.train({}, dataMatrix, 1, xgb_model=xg_reg)
+	logging.info(xg_reg)
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
 
 def __main__():
