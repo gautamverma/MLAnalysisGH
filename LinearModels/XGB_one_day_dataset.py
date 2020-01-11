@@ -138,7 +138,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 	categoricalCols = [ 'merchant_id', 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
 	categoryLists = []
 	for col in categoricalCols:
-		categoryLists.append(loadCategorialList(base_folder, col)
+		categoryLists.append(loadCategorialList(base_folder, col))
 
 	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore')	
 
@@ -180,8 +180,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		
 		cLength = len(categoricalCols)
 		nLength = len(numericCols)
-		X1, X2, Y = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength:cLength+nLength+1],
-			 df_merged_set.iloc[:,0]
+		X1, X2, Y = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength:cLength+nLength+1], df_merged_set.iloc[:,0]
 		
 		one_hot_encoder.fit(X1)
 		one_hot_encoded = one_hot_encoder.transform(X1)
