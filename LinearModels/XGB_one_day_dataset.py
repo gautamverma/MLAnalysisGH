@@ -92,8 +92,8 @@ def loadDatasets(base_folder, cleanDframe):
 
 
 	metrics_df3 = pd.read_csv(base_folder + PLACEMENT_PROPERTIES_FILENAME, skiprows=0, header=None)
-	metrics_df3  = metrics_df4[['frozen_placement_id', 'container_type', 'container_id', 
-				'slot_names', 'merchant_id', 'site','start_date', 'end_date']]
+	metrics_df3.columns  = ['frozen_placement_id', 'container_type', 'container_id', 
+				'slot_names', 'site', 'start_date', 'end_date']
 
 	if cleanDframe:
 		metrics_df3  = cleanDataframe(metrics_df3)
@@ -135,14 +135,14 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 	xg_reg = loadModel(learning_rate_val, max_depth_val)
 
 	#Load the categorical columns for faster filling in between
-	categoricalCols = [ 'merchant_id', 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
+	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
 	categoryLists = []
 	for col in categoricalCols:
 		categoryLists.append(loadCategorialList(base_folder, col))
 
 	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore')	
 
-	training_data_file = base_folder + '01NovemberDS_Metrics000'
+	training_data_file = base_folder + '3Hour1DecemberPM000'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		logging.info("Start chunk Processing - " + str(chunkcount))
 		chunkcount = chunkcount + 1 
@@ -152,8 +152,8 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		chunk['metrics_hour'] = pd.to_datetime(chunk['metrics_hour'], format='%Y %m %d %H:%M:%S')
 		chunk['metrics_hour'] = chunk['metrics_hour'].dt.tz_localize(None)
 		
-		df4['start_date'] =  pd.to_datetime(df4['start_date'], format='%Y %m %d %H:%M:%S')
-		df4['end_date'] =  pd.to_datetime(df4['end_date'], format='%Y %m %d %H:%M:%S')
+		df3['start_date'] =  pd.to_datetime(df3['start_date'], format='%Y %m %d %H:%M:%S')
+		df3['end_date'] =  pd.to_datetime(df3['end_date'], format='%Y %m %d %H:%M:%S')
 
 		df_merged_set = mergeDataframe(chunk, df1, 'frozen_placement_id')
 		logging.info("Merged df1")
@@ -178,17 +178,18 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 		df_merged_set = df_merged_set[columns_to_keep]	
 		
-		cLength = len(categoricalCols)
 		nLength = len(numericCols)
+		cLength = len(categoricalCols)
 		X1, X2, Y = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength:cLength+nLength+1], df_merged_set.iloc[:,0]
 		
 		one_hot_encoder.fit(X1)
 		one_hot_encoded = one_hot_encoder.transform(X1)
 		print(one_hot_encoded)
 
-		logging.info(str(X.size) + " : "+str(X[categoricalCols].size)+" : "+str(one_hot_encoded.size))
+		logging.info(str(X2.size) + " : "+str(one_hot_encoded.size))
 		# Drop the ctegorical columns 
-		X = pd.concat([X2, one_hot_encoded], axis=1)		
+		oneHotdf = pd.DataFrame(one_hot_encoded.toarray())
+		X = pd.concat([X2, oneHotdf], axis=1)	
 		xg_reg.fit(X, Y)
 
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
