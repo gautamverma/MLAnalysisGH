@@ -124,7 +124,7 @@ def predict(xg_reg, one_hot_encoder, base_folder):
 
 		df = pd.DataFrame({'actual': Y, 'predictions': predictions})
 		logging.info(str(df))
-
+	logging.info("Prediction Over")
 
 def __main__():
 	# count the arguments
