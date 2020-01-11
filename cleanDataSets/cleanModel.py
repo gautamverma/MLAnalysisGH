@@ -139,8 +139,8 @@ def trainModel(base_folder, clean, outputfile):
 		columns_to_write = df_merged_set.columns
 		if chunkcount == 1:
 			df_merged_set.to_csv(metrics_file, columns=columns_to_write, index=False, mode='a')
-    	else:
-    		df_merged_set.to_csv(metrics_file, columns=columns_to_write, index=False, header=False, mode='a')
+		else:
+			df_merged_set.to_csv(metrics_file, columns=columns_to_write, index=False, header=False, mode='a')
 		chunkcount = chunkcount + 1 
 
 def __main__():
