@@ -175,12 +175,12 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		YColumns = ['impressions']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval']
 		columns_to_keep = YColumns + categoricalCols + numericCols 
-
+		logging.info(columns_to_keep)
 		df_merged_set = df_merged_set[columns_to_keep]	
 		
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
-		X1, X2, Y = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength:cLength+nLength+1], df_merged_set.iloc[:,0]
+		X1, X2, Y = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength+1:cLength+nLength+1], df_merged_set.iloc[:,0]
 		
 		one_hot_encoder.fit(X1)
 		one_hot_encoded = one_hot_encoder.transform(X1)
@@ -188,9 +188,9 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 
 		logging.info(str(X2.size) + " : "+str(one_hot_encoded.size))
 
-		# Drop the ctegorical columns 
-		X = np.concatenate((X2, oneHotdf), axis=1)	
-		print(X)
+		# Drop the ctegorical columns 	
+		dataMatrix = DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
+		xgboost.train(dataMatrix)
 		xg_reg.fit(X, Y.to_numpy())
 
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
