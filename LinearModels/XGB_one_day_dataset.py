@@ -140,7 +140,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 	for col in categoricalCols:
 		categoryLists.append(loadCategorialList(base_folder, col))
 
-	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore')	
+	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore', sparse=False)	
 
 	training_data_file = base_folder + '3Hour1DecemberPM000'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
@@ -187,10 +187,11 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		print(one_hot_encoded)
 
 		logging.info(str(X2.size) + " : "+str(one_hot_encoded.size))
+
 		# Drop the ctegorical columns 
-		oneHotdf = pd.DataFrame(one_hot_encoded.toarray())
-		X = pd.concat([X2, oneHotdf], axis=1)	
-		xg_reg.fit(X, Y)
+		X = np.concatenate((X2, oneHotdf), axis=1)	
+		print(X)
+		xg_reg.fit(X, Y.to_numpy())
 
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
 
