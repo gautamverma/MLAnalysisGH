@@ -175,7 +175,6 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		YColumns = ['impressions']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval']
 		columns_to_keep = YColumns + categoricalCols + numericCols 
-		logging.info(columns_to_keep)
 		df_merged_set = df_merged_set[columns_to_keep]	
 		
 		nLength = len(numericCols)
@@ -184,7 +183,6 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		
 		one_hot_encoder.fit(X1)
 		one_hot_encoded = one_hot_encoder.transform(X1)
-		print(one_hot_encoded)
 
 		logging.info(str(X2.size) + " : "+str(one_hot_encoded.size))
 
