@@ -189,9 +189,8 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, clean):
 		logging.info(str(X2.size) + " : "+str(one_hot_encoded.size))
 
 		# Drop the ctegorical columns 	
-		dataMatrix = DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
-		xgboost.train(dataMatrix)
-		xg_reg.fit(X, Y.to_numpy())
+		dataMatrix = xgb.DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
+		xgboost.train({}, dataMatrix, 1, xgb_model=xg_reg)
 
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
 
