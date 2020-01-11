@@ -27,8 +27,8 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # TODO To resolve this we need put the columns in same order and intialize the old columns 
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
-# Batch size of 1000000
-CHUNKSIZE = 1000000
+# Batch size of 100000
+CHUNKSIZE = 10000
 CONSTANT_FILLER = 'unknown_flag'
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val):
@@ -90,28 +90,27 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 		# Drop the ctegorical columns 	
 		dataMatrix = xgb.DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
 		if(chunkcount==1):
-			xg_reg = xgb.train({}, dataMatrix, 1)
+			xg_reg = xgb.train({}, dataMatrix, 10)
 		else:
 			# Takes in the intially model and produces a better one
-			xg_reg = xgb.train({}, dataMatrix, 1, xgb_model=xg_reg)
+			xg_reg = xgb.train({}, dataMatrix, 10, xgb_model=xg_reg)
 		logging.info("Model saved "+str(xg_reg))
 		chunkcount = chunkcount + 1 
 	logging.info(xg_reg)
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
-	predict(xg_reg, one_hot_encoder)
+	predict(xg_reg, one_hot_encoder, base_folder)
 
-def predict(xgbModel, one_hot_encoder):
+def predict(xg_reg, one_hot_encoder, base_folder):
 	training_data_file = base_folder + '3HourDataFullFile.csv'
 
 	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
-
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		YColumns = ['impressions']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval']
 		categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
 
 		columns_to_keep = YColumns + categoricalCols + numericCols 
-		df_merged_set = df_merged_set[columns_to_keep]	
+		df_merged_set = chunk[columns_to_keep]	
 		
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
@@ -120,7 +119,9 @@ def predict(xgbModel, one_hot_encoder):
 		one_hot_encoder.fit(X1)
 		one_hot_encoded = one_hot_encoder.transform(X1)
 
-		predictions = xg_reg.predict(np.concatenate((X2, one_hot_encoded), axis=1))
+		dataMatrix = xgb.DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
+		predictions = xg_reg.predict(dataMatrix)
+
 		df = pd.dataframe({'actual': Y, 'predictions': predictions})
 		logging.info(str(df))
 
