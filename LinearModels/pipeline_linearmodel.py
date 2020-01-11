@@ -64,7 +64,7 @@ def cleanDataframe(df):
 
 def loadDatasets(cleanDF):
 	logging.info("Start loading of the datasets")
-	PlACEMENTS__FILENAME = '3_10_files/3_10NovemberDS_Placementfeature000'
+	PlACEMENTS__FILENAME = ''
 	CONTENT_FILENAME = '3_10_files/3_10NovemberDS_Contentfeature000'
 	RESOURCEBUNDLE_FILENAME = '3_10_files/3_10NovemberDS_Bundlefeature000'
 	PLACEMENT_PROPERTIES_FILENAME = '3_10_files/3_10November0S_7feature000'
@@ -84,11 +84,6 @@ def loadDatasets(cleanDF):
 	metrics_df2.columns = ['frozen_content_id', 'component_name', 'component_namespace', 'created_by']
 	if cleanDF:
 		metrics_df2  = cleanDataframe(metrics_df2)
-
-	metrics_df3 = pd.read_csv('/data/s3_file/'+RESOURCEBUNDLE_FILENAME, skiprows=0, header=None)
-	metrics_df3.columns = ['frozen_content_id', 'language_code']
-	if cleanDF:
-		metrics_df3  = cleanDataframe(metrics_df3)
 
 	metrics_df4 = pd.read_csv('/data/s3_file/'+PLACEMENT_PROPERTIES_FILENAME, skiprows=0, header=None)
 	metrics_df4.columns = ['frozen_placement_id', 'container_type', 'container_id', 'slot_names', 'merchant_id', 'site', 'weblab', 'bullseye', 'is_recognized', 'parent_browse_nodes', 'store_names','start_date', 'end_date']
