@@ -53,11 +53,11 @@ def labelCategoricalColumn(df, columnNm, columnSeries):
 	logging.info(columnSeries.head())
 	for index, row in df.iterrows():
 		if row[columnNm] in columnSeries:
-			df.loc[index, columnNm +'_label'] = columnSeries[row[columnNm]]
+			df.loc[index, columnNm +'_label'] = columnSeries.loc[row[columnNm]]
 		else:
 			# Add -1 for unknown values
 			df.loc[index, columnNm +'_label'] = -1	
-	df = df.drop([columnNm], axis=1, in_place=True)
+	df = df.drop([columnNm], axis=1, inplace=True)
 	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
 
 def trainModel(learning_rate_val, max_depth_val, base_folder):		
