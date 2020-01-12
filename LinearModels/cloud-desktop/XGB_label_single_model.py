@@ -50,8 +50,9 @@ def loadCategorialSeries(base_folder, columnNm):
 	return column_series, list(column_series.index)
 
 def labelCategoricalColumn(df, columnNm, columnSeries):
+	logging.info(df[columnNm])
+	logging.info(columnSeries.head())
 	df[columnNm + '_label'] = columnSeries[df[columnNm]]
-	logging.info(df[columnNm])	
 	logging.info(df[columnNm + '_label'])
 	df.drop([''+columnNm], axis=1, in_place=True)
 	df.rename(columns = {columnNm + "_label": columnNm}, in_place=True) 
@@ -77,7 +78,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore', sparse=False)	
 
 	labelCols = ['slot_names', 'component_name', 'component_namespace']
-	labelSeries = []
+	labelSeries = {}
 	for col in labelCols:
 		labelSeries[''+col], tempList = loadCategorialSeries(base_folder, col)
 
@@ -125,7 +126,7 @@ def predict(xg_reg, one_hot_encoder, base_folder):
 	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		YColumns = ['impressions']
-		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval']
+		numericCols = ['guarantee_percentage', 'start_days', 'start_hours']
 		categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
 
 		columns_to_keep = YColumns + categoricalCols + numericCols 
