@@ -31,8 +31,8 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 CHUNKSIZE = 10000
 CONSTANT_FILLER = 'unknown_flag'
 
-def saveModel(xg_reg, learning_rate_val, max_depth_val):
-	filename =  '/data/models/XGB_MODEL_{}_{}_{}.sav'
+def saveModel(xg_reg, learning_rate_val, max_depth_val, base_folder):
+	filename = base_folder + '/models/XGB_MODEL_{}_{}_{}.sav'
 	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
 	pickle.dump(xg_reg, open(filename, 'wb'))
 
@@ -49,8 +49,14 @@ def loadCategorialSeries(base_folder, columnNm):
 	column_series = pd.Series(column_dict)
 	return column_series
 
-def trainModel(learning_rate_val, max_depth_val, base_folder):
-		
+def labelCategoricalColumn(df, columnNm, columnSeries):
+	df[columnNm + '_label'] = columnSeries[df[columnNm]]
+	logging.info(df[columnNm])	
+	logging.info(df[columnNm + '_label'])
+	df.drop([''+columnNm], axis=1, in_place=True)
+	df.rename(columns = {columnNm + "_label": columnNm}, in_place=True) 
+
+def trainModel(learning_rate_val, max_depth_val, base_folder):		
 	learning_params = {
 		'objective' : 'reg:squarederror',
 		'colsample_bytree' : 0.3,
@@ -62,32 +68,42 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 	xg_reg = None
 
 	#Load the categorical columns for faster filling in between
-	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
+	categoricalCols = [ 'container_type', 'site', 'language_code']
 	categorySeries = {}
 	for col in categoricalCols:
 		categorySeries[''+col] = loadCategorialSeries(base_folder, col)
 
-	#one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore', sparse=False)	
+	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore', sparse=False)	
+
+	labelCols = ['slot_names', 'component_name', 'component_namespace']
+	labelSeries = []
+	for col in labelCols:
+		labelSeries[''+col] = loadCategorialSeries(base_folder, col)
 
 	chunkcount = 1
-	training_data_file = base_folder + '3HourDataFullFile.csv'
+	training_data_file = base_folder + 'full_7_day_ML.csv'
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		logging.info("Start chunk Processing - " + str(chunkcount))
 		logging.info(chunk.columns)
 		
 		YColumns = ['impressions']
 		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval']
-		columns_to_keep = YColumns + categoricalCols + numericCols 
+		columns_to_keep = YColumns + categoricalCols + labelCols + numericCols 
 		df_merged_set = chunk[columns_to_keep]	
 		
+		for col in labelCols:
+			labelCategoricalColumn(df_merged_set, col, labelSeries[col])
+
+		logging.info(df)
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
-		X1, X2, Y = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength+1:cLength+nLength+1], df_merged_set.iloc[:,0]
-		
+		nLabellength = len(labelCols)
+		X1, X2 = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength+1:cLength+nLabellength+nLength+1], 
+		Y = df_merged_set.iloc[:,0]
 		# Use label encoding for bigger columns
 
-		#one_hot_encoder.fit(X1)
-		#one_hot_encoded = one_hot_encoder.transform(X1)
+		one_hot_encoder.fit(X1)
+		one_hot_encoded = one_hot_encoder.transform(X1)
 
 		# Drop the ctegorical columns 	
 		dataMatrix = xgb.DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
