@@ -59,7 +59,7 @@ def labelCategoricalColumn(df, columnNm, columnSeries):
 	label_dict = dict(zip(label.classes_, label.transform(label.classes_)))
 
 	# -1 is given to unknown classes
-	df[columnNm].apply(lambda x: le_dict.get(x, -1))
+	return df[columnNm].apply(lambda x: label_dict.get(x, -1))
 
 def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):		
 	learning_params = {
@@ -98,7 +98,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):
 		df_merged_set = chunk[columns_to_keep]	
 		
 		for col in labelCols:
-			labelCategoricalColumn(df_merged_set, col, labelSeries[col])
+			df_merged_set[col] = labelCategoricalColumn(df_merged_set, col, labelSeries[col])
 
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
@@ -113,10 +113,10 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):
 		# Drop the ctegorical columns 	
 		dataMatrix = xgb.DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
 		if(chunkcount==1):
-			xg_reg = xgb.train({}, dataMatrix, 10)
+			xg_reg = xgb.train(learning_params, dataMatrix, 10)
 		else:
 			# Takes in the intially model and produces a better one
-			xg_reg = xgb.train({}, dataMatrix, 10, xgb_model=xg_reg)
+			xg_reg = xgb.train(learning_params, dataMatrix, 10, xgb_model=xg_reg)
 		logging.info("Model saved "+str(xg_reg))
 		if(earlyBreak=='1' and chunkcount>10):
 			break
