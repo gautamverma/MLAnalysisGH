@@ -136,11 +136,11 @@ def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak, labelSeries):
 		numericCols = ['guarantee_percentage', 'start_days', 'start_hours']
 		labelCols = ['slot_names', 'component_name', 'component_namespace']
 
-		columns_to_keep = YColumns + categoricalCols + numericCols 
+		columns_to_keep = YColumns + categoricalCols + labelCols + numericCols 
 		df_merged_set = chunk[columns_to_keep]	
 		
 		for col in labelCols:
-			labelCategoricalColumn(df_merged_set, col, labelSeries[col])
+			df_merged_set[col] = labelCategoricalColumn(df_merged_set, col, labelSeries[col])
 
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
