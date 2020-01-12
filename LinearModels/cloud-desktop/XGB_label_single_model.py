@@ -89,7 +89,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 		logging.info(chunk.columns)
 		
 		YColumns = ['impressions']
-		numericCols = ['guarantee_percentage', 'days_interval', 'hours_interval']
+		numericCols = ['guarantee_percentage', 'start_days', 'start_hours']
 		columns_to_keep = YColumns + categoricalCols + labelCols + numericCols 
 		df_merged_set = chunk[columns_to_keep]	
 		
