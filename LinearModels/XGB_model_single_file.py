@@ -50,7 +50,7 @@ def loadCategorialList(base_folder, columnNm):
 	column_series = pd.Series(column_dict)
 	return list(column_series.index)
 
-def trainModel(learning_rate_val, max_depth_val, base_folder):
+def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):
 		
 	learning_params = {
 		'objective' : 'reg:squarederror',
@@ -101,9 +101,9 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 		chunkcount = chunkcount + 1 
 	logging.info(xg_reg)
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
-	predict(xg_reg, one_hot_encoder, base_folder)
+	predict(xg_reg, one_hot_encoder, base_folder, earlyBreak)
 
-def predict(xg_reg, one_hot_encoder, base_folder):
+def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak):
 	training_data_file = base_folder + '3HourDataFullFile.csv'
 
 	chunkcount = 1
@@ -137,8 +137,8 @@ def predict(xg_reg, one_hot_encoder, base_folder):
 def __main__():
 	# count the arguments
 	if len(sys.argv) < 4:
-		raise RuntimeError("Please provode the learning_rate, max_depth and base folder")
-	trainModel(sys.argv[1], sys.argv[2], sys.argv[3])
+		raise RuntimeError("Please provode the learning_rate, max_depth, base folder and earlyBreak")
+	trainModel(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 
 #This is required to call the main function
 if __name__ == "__main__":
