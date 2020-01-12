@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC
 from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -123,7 +124,9 @@ def predict(xg_reg, one_hot_encoder, base_folder):
 		predictions = xg_reg.predict(dataMatrix)
 
 		df = pd.DataFrame({'actual': Y, 'predictions': predictions})
-		logging.info(str(df))
+		accuracy = accuracy_score(Y, predictions)
+		logging.info("Accuracy: %.2f%%" % (accuracy * 100.0))
+		logging.info(str(df.head()))
 	logging.info("Prediction Over")
 
 def __main__():
