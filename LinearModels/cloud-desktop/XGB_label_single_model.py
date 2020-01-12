@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC
 from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -35,7 +36,6 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val, base_folder):
 	filename = base_folder + '/models/XGB_MODEL_{}_{}_{}.sav'
 	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
 	pickle.dump(xg_reg, open(filename, 'wb'))
-
 	logging.info("training complete and model is saved")
 
 # Load the Labels Vocabulary in One Hot Encoder
@@ -57,10 +57,10 @@ def labelCategoricalColumn(df, columnNm, columnSeries):
 		else:
 			# Add -1 for unknown values
 			df.loc[index, columnNm +'_label'] = -1	
-	df = df.drop([columnNm], axis=1, inplace=True)
+	df.drop([columnNm], axis=1, inplace=True)
 	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
 
-def trainModel(learning_rate_val, max_depth_val, base_folder):		
+def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):		
 	learning_params = {
 		'objective' : 'reg:squarederror',
 		'colsample_bytree' : 0.3,
@@ -99,7 +99,6 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 		for col in labelCols:
 			labelCategoricalColumn(df_merged_set, col, labelSeries[col])
 
-		logging.info(df)
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
 		nLabellength = len(labelCols)
@@ -118,26 +117,32 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 			# Takes in the intially model and produces a better one
 			xg_reg = xgb.train({}, dataMatrix, 10, xgb_model=xg_reg)
 		logging.info("Model saved "+str(xg_reg))
+		if(earlyBreak=='1' and chunkcount<10):
+			break
 		chunkcount = chunkcount + 1 
+	
 	logging.info(xg_reg)
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
-	predict(xg_reg, one_hot_encoder, base_folder)
+	predict(xg_reg, one_hot_encoder, base_folder, earlyBreak)
 
-def predict(xg_reg, one_hot_encoder, base_folder):
-	training_data_file = base_folder + '3HourDataFullFile.csv'
+def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak):
+	training_data_file = base_folder + 'full_7_day_ML.csv'
 
-	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
+	chunkcount = 1
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		YColumns = ['impressions']
+		categoricalCols = [ 'container_type', 'site', 'language_code']
 		numericCols = ['guarantee_percentage', 'start_days', 'start_hours']
-		categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
+		labelCols = ['slot_names', 'component_name', 'component_namespace']
 
 		columns_to_keep = YColumns + categoricalCols + numericCols 
 		df_merged_set = chunk[columns_to_keep]	
 		
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
-		X1, X2, Y = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength+1:cLength+nLength+1], df_merged_set.iloc[:,0]
+		nLabellength = len(labelCols)
+		X1, X2 = df_merged_set.iloc[:,1:cLength+1], df_merged_set.iloc[:,cLength+1:cLength+nLabellength+nLength+1], 
+		Y = df_merged_set.iloc[:,0]
 		
 		one_hot_encoder.fit(X1)
 		one_hot_encoded = one_hot_encoder.transform(X1)
@@ -146,14 +151,21 @@ def predict(xg_reg, one_hot_encoder, base_folder):
 		predictions = xg_reg.predict(dataMatrix)
 
 		df = pd.DataFrame({'actual': Y, 'predictions': predictions})
-		logging.info(str(df))
+		accuracy = accuracy_score(Y, predictions)
+		logging.info("Accuracy: %.2f%%" % (accuracy * 100.0))
+		logging.info(str(df.head()))
+	
+		if(earlyBreak=='1' and chunkcount<10):
+			break
+		chunkcount = chunkcount + 1 
+	
 	logging.info("Prediction Over")
 
 def __main__():
 	# count the arguments
-	if len(sys.argv) < 4:
+	if len(sys.argv) < 5:
 		raise RuntimeError("Please provode the learning_rate, max_depth and base folder")
-	trainModel(sys.argv[1], sys.argv[2], sys.argv[3])
+	trainModel(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
 
 #This is required to call the main function
 if __name__ == "__main__":

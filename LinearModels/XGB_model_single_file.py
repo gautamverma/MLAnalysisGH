@@ -96,6 +96,8 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 			# Takes in the intially model and produces a better one
 			xg_reg = xgb.train({}, dataMatrix, 10, xgb_model=xg_reg)
 		logging.info("Model saved "+str(xg_reg))
+		if(earlyBreak=='1' and chunkcount<10):
+			break
 		chunkcount = chunkcount + 1 
 	logging.info(xg_reg)
 	saveModel(xg_reg, learning_rate_val, max_depth_val)
@@ -104,6 +106,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 def predict(xg_reg, one_hot_encoder, base_folder):
 	training_data_file = base_folder + '3HourDataFullFile.csv'
 
+	chunkcount = 1
 	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace', 'site']
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		YColumns = ['impressions']
@@ -127,6 +130,8 @@ def predict(xg_reg, one_hot_encoder, base_folder):
 		accuracy = accuracy_score(Y, predictions)
 		logging.info("Accuracy: %.2f%%" % (accuracy * 100.0))
 		logging.info(str(df.head()))
+		if(earlyBreak=='1' and chunkcount<10):
+			break
 	logging.info("Prediction Over")
 
 def __main__():
