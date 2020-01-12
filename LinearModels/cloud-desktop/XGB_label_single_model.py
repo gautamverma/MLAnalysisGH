@@ -34,7 +34,7 @@ CHUNKSIZE = 1000000
 CONSTANT_FILLER = 'unknown_flag'
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, base_folder):
-	filename = base_folder + '/models/XGB_MODEL_{}_{}_{}.sav'
+	filename = base_folder + 'models/XGB_MODEL_{}_{}_{}.sav'
 	filename  = filename.format(learning_rate_val, max_depth_val, int(datetime.datetime.now().timestamp())) 
 	pickle.dump(xg_reg, open(filename, 'wb'))
 	logging.info("training complete and model is saved")
