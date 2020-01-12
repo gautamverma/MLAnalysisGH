@@ -28,8 +28,8 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # TODO To resolve this we need put the columns in same order and intialize the old columns 
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
-# Batch size of 100000
-CHUNKSIZE = 10000
+# Batch size of 10000000
+CHUNKSIZE = 1000000
 CONSTANT_FILLER = 'unknown_flag'
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, base_folder):
