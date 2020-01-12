@@ -130,8 +130,10 @@ def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak):
 		accuracy = r2_score(Y.to_numpy(), predictions)
 		logging.info("Accuracy(Max:1 , 0 for stright line) : " + str(accuracy))
 		logging.info(str(df.head()))
+		
 		if(earlyBreak=='1' and chunkcount>10):
 			break
+		chunkcount = chunkcount + 1 	
 	logging.info("Prediction Over")
 
 def __main__():
