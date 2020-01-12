@@ -55,10 +55,11 @@ def labelCategoricalColumn(df, columnNm, columnSeries):
 
 	label = LabelEncoder()
 	label.fit(columnSeries.to_numpy())
-	df[columnNm + '_label'] = label.transform(df[columnNm])
-		
-	df.drop([columnNm], axis=1, inplace=True)
-	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
+	# Prepare a dictionary for it 
+	label_dict = dict(zip(label.classes_, label.transform(label.classes_)))
+
+	# -1 is given to unknown classes
+	df[columnNm].apply(lambda x: le_dict.get(x, -1))
 
 def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):		
 	learning_params = {
