@@ -96,7 +96,7 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):
 			# Takes in the intially model and produces a better one
 			xg_reg = xgb.train({}, dataMatrix, 10, xgb_model=xg_reg)
 		logging.info("Model saved "+str(xg_reg))
-		if(earlyBreak=='1' and chunkcount<10):
+		if(earlyBreak=='1' and chunkcount>10):
 			break
 		chunkcount = chunkcount + 1 
 	logging.info(xg_reg)
@@ -130,7 +130,7 @@ def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak):
 		accuracy = r2_score(Y.to_numpy(), predictions)
 		logging.info("Accuracy(Max:1 , 0 for stright line) : " + str(accuracy))
 		logging.info(str(df.head()))
-		if(earlyBreak=='1' and chunkcount<10):
+		if(earlyBreak=='1' and chunkcount>10):
 			break
 	logging.info("Prediction Over")
 
