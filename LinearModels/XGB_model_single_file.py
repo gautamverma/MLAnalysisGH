@@ -11,8 +11,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC
+from sklearn.metrics import r2_score
 from sklearn.impute import SimpleImputer
-from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
@@ -127,8 +127,8 @@ def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak):
 		predictions = xg_reg.predict(dataMatrix)
 
 		df = pd.DataFrame({'actual': Y, 'predictions': predictions})
-		accuracy = accuracy_score(Y, predictions)
-		logging.info("Accuracy: %.2f%%" % (accuracy * 100.0))
+		accuracy = r2_score(Y.to_numpy(), predictions)
+		logging.info("Accuracy(Max:1 , 0 for stright line) : " + str(accuracy))
 		logging.info(str(df.head()))
 		if(earlyBreak=='1' and chunkcount<10):
 			break
