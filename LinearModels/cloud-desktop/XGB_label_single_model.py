@@ -15,6 +15,7 @@ from sklearn.metrics import r2_score
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
@@ -51,12 +52,11 @@ def loadCategorialSeries(base_folder, columnNm):
 
 def labelCategoricalColumn(df, columnNm, columnSeries):
 	logging.info(columnSeries.head())
-	for index, row in df.iterrows():
-		if row[columnNm] in columnSeries:
-			df.loc[index, columnNm +'_label'] = columnSeries.loc[row[columnNm]]
-		else:
-			# Add -1 for unknown values
-			df.loc[index, columnNm +'_label'] = -1	
+
+	label = LabelEncoder()
+	label.fit(columnSeries.to_numpy())
+	df[columnNm + '_label'] = label.transform(df[columnNm])
+		
 	df.drop([columnNm], axis=1, inplace=True)
 	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
 
