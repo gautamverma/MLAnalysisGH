@@ -52,8 +52,8 @@ def loadCategorialSeries(base_folder, columnNm):
 def labelCategoricalColumn(df, columnNm, columnSeries):
 	logging.info(columnSeries.head())
 	for index, row in df.iterrows():
-		if row[columnNm] in column_series:
-			df.loc[index, columnNm +'_label'] = column_series[row[columnNm]]
+		if row[columnNm] in columnSeries:
+			df.loc[index, columnNm +'_label'] = columnSeries[row[columnNm]]
 		else:
 			# Add -1 for unknown values
 			df.loc[index, columnNm +'_label'] = -1	
