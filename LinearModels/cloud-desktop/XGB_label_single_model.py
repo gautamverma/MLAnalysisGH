@@ -47,7 +47,7 @@ def loadCategorialSeries(base_folder, columnNm):
 	column_dict_file = open(map_file, "rb")
 	column_dict = pickle.load(column_dict_file)
 	column_series = pd.Series(column_dict)
-	return column_series
+	return column_series, list(column_series.index)
 
 def labelCategoricalColumn(df, columnNm, columnSeries):
 	df[columnNm + '_label'] = columnSeries[df[columnNm]]
@@ -69,16 +69,17 @@ def trainModel(learning_rate_val, max_depth_val, base_folder):
 
 	#Load the categorical columns for faster filling in between
 	categoricalCols = [ 'container_type', 'site', 'language_code']
-	categorySeries = {}
+	categoryLists = []
 	for col in categoricalCols:
-		categorySeries[''+col] = loadCategorialSeries(base_folder, col)
+		tempSeries, tempList = loadCategorialSeries(base_folder, col)
+		categoryLists.append(tempList)
 
 	one_hot_encoder = OneHotEncoder(categories=categoryLists, handle_unknown='ignore', sparse=False)	
 
 	labelCols = ['slot_names', 'component_name', 'component_namespace']
 	labelSeries = []
 	for col in labelCols:
-		labelSeries[''+col] = loadCategorialSeries(base_folder, col)
+		labelSeries[''+col], tempList = loadCategorialSeries(base_folder, col)
 
 	chunkcount = 1
 	training_data_file = base_folder + 'full_7_day_ML.csv'
