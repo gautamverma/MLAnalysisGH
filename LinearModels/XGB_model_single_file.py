@@ -91,10 +91,10 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):
 		# Drop the ctegorical columns 	
 		dataMatrix = xgb.DMatrix(np.concatenate((X2, one_hot_encoded), axis=1), label=Y.to_numpy())
 		if(chunkcount==1):
-			xg_reg = xgb.train({}, dataMatrix, 10)
+			xg_reg = xgb.train(learning_params, dataMatrix, 10)
 		else:
 			# Takes in the intially model and produces a better one
-			xg_reg = xgb.train({}, dataMatrix, 10, xgb_model=xg_reg)
+			xg_reg = xgb.train(learning_params, dataMatrix, 10, xgb_model=xg_reg)
 		logging.info("Model saved "+str(xg_reg))
 		if(earlyBreak=='1' and chunkcount>10):
 			break
