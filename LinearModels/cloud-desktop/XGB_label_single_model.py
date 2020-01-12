@@ -50,12 +50,15 @@ def loadCategorialSeries(base_folder, columnNm):
 	return column_series, list(column_series.index)
 
 def labelCategoricalColumn(df, columnNm, columnSeries):
-	logging.info(df[columnNm])
 	logging.info(columnSeries.head())
-	df[columnNm + '_label'] = columnSeries[df[columnNm]]
-	logging.info(df[columnNm + '_label'])
-	df.drop([''+columnNm], axis=1, in_place=True)
-	df.rename(columns = {columnNm + "_label": columnNm}, in_place=True) 
+	for index, row in df.iterrows():
+		if row[columnNm] in column_series:
+			df.loc[index, columnNm +'_label'] = column_series[row[columnNm]]
+		else:
+			# Add -1 for unknown values
+			df.loc[index, columnNm +'_label'] = -1	
+	df = df.drop([columnNm], axis=1, in_place=True)
+	df.rename(columns={columnNm + "_label": columnNm}, inplace=True)
 
 def trainModel(learning_rate_val, max_depth_val, base_folder):		
 	learning_params = {
