@@ -122,10 +122,10 @@ def trainModel(learning_rate_val, max_depth_val, base_folder, earlyBreak):
 		chunkcount = chunkcount + 1 
 	
 	logging.info(xg_reg)
-	saveModel(xg_reg, learning_rate_val, max_depth_val)
-	predict(xg_reg, one_hot_encoder, base_folder, earlyBreak)
+	saveModel(xg_reg, learning_rate_val, max_depth_val, base_folder)
+	predict(xg_reg, one_hot_encoder, base_folder, earlyBreak, labelSeries)
 
-def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak):
+def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak, labelSeries):
 	training_data_file = base_folder + 'full_7_day_ML.csv'
 
 	chunkcount = 1
@@ -138,6 +138,9 @@ def predict(xg_reg, one_hot_encoder, base_folder, earlyBreak):
 		columns_to_keep = YColumns + categoricalCols + numericCols 
 		df_merged_set = chunk[columns_to_keep]	
 		
+		for col in labelCols:
+			labelCategoricalColumn(df_merged_set, col, labelSeries[col])
+
 		nLength = len(numericCols)
 		cLength = len(categoricalCols)
 		nLabellength = len(labelCols)
