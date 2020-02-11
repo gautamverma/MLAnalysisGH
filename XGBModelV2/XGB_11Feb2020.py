@@ -88,6 +88,9 @@ def generateCleanFile(files, training_file_name):
 	df_merged_set.to_csv(training_file_name)
 
 
+def trainModel(learning_rate, max_depth, training_file_name):
+	return
+
 def startSteps(learning_rate, max_depth):
 	files =	[ 
 			'/data/s3_file/FE/18January03FebPMetrics000',
@@ -96,14 +99,15 @@ def startSteps(learning_rate, max_depth):
 			'/data/s3_file/FE/18January03FebPP000'
 			'/data/s3_file/FE/18January03FebCreative000'
 			]
-	generateCleanFile(files, '/data/s3_file/FE/18January03FebTrainingFile.csv')
-
+	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile.csv'
+	generateCleanFile(files, training_file_name)
+	trainModel(learning_rate, max_depth, training_file_name)
 
 def __main__():
 	# count the arguments
 	if len(sys.argv) < 3:
 		raise RuntimeError("Please provide the learning_rate and max_depth")
-	trainModel(sys.argv[1], sys.argv[2])
+	startSteps(sys.argv[1], sys.argv[2])
 
 #This is required to call the main function
 if __name__ == "__main__":
