@@ -87,7 +87,8 @@ def generateCleanFile(files, training_file_name):
 
 	# Generate the unique set and map values
 	unique_container_ids = df_merged_set.container_id.unique().tolist()
-	df_merged_set['container_id_label'] = df_merged_set.apply (lambda row: label_column(row, unique_values, 'container_id'), axis=1)
+	logging.info("unique set created")
+	df_merged_set['container_id_label'] = df_merged_set.apply (lambda row: label_column(row, unique_container_ids, 'container_id'), axis=1)
 	logging.info(df_merged_set.head())
 
 	df_merged_set.to_csv(training_file_name)
