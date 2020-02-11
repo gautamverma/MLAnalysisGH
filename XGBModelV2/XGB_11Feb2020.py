@@ -58,7 +58,7 @@ def loadAndMerge(files):
 	df_merged_set = pd.merge(df1, df4, on='frozen_placement_id', how='inner')
 	df_merged_set = pd.merge(df_merged_set, df2, on='frozen_placement_id', how='inner')
 	df_merged_set = pd.merge(df_merged_set, df3, on='frozen_content_id', how='inner')
-	df_merged_set = pd.merge(df_merged_set, df3, on='creative_id', how='inner')
+	df_merged_set = pd.merge(df_merged_set, df5, on='creative_id', how='inner')
 	logging.info('File merged');
 	return df_merged_set
 
@@ -76,7 +76,7 @@ def generateCleanFile(files, training_file_name):
 
 	# Clean few Columns 
 	# Targetting Columns
-	df_merged_set[['customer_targeting']] = df_merged_set[['customer_targeting']].fillna(value=allCustomer)
+	df_merged_set[['customer_targeting']] = df_merged_set[['customer_targeting']].fillna(value=ALL_CONSUMER)
 	df_merged_set[['guarantee_percentage']] = df_merged_set[['guarantee_percentage']].fillna(value=CONSTANT_FILLER)
 	df_merged_set[['component_display_name']] = df_merged_set[['component_display_name']].fillna(value=CONSTANT_FILLER)
 	logging.info('Targetting Columns Cleaned');
@@ -84,7 +84,7 @@ def generateCleanFile(files, training_file_name):
 	df_merged_set[['objective']] = df_merged_set[['objective']].fillna(value=CONSTANT_FILLER)
 	df_merged_set[['intent']] = df_merged_set[['intent']].fillna(value=CONSTANT_FILLER)
 	logging.info('Creative Columns Cleaned');
-	
+
 	# Generate the unique set and map values
 	unique_container_ids = df_merged_set.container_id.unique().tolist()
 	df_merged_set['container_id_label'] = df_merged_set.apply (lambda row: label_column(row), axis=1)
