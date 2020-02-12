@@ -122,7 +122,6 @@ def removeNaN(df, categoricalCols):
 # Build the One hot encoder using all data
 def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder = OneHotEncoder(sparse=False)
-
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
 	df = df[categoricalCols]
 	df = removeNaN(df, categoricalCols)
@@ -146,7 +145,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 
 	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
-	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
+	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
 						'component_display_name', 'customer_targeting', 'site']
 
 	startOneHotIndex = len(numericalCols)
