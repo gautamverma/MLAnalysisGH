@@ -12,7 +12,9 @@ import matplotlib.pyplot as plt
 
 from sklearn.svm import SVC
 from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score 
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report 
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
@@ -105,8 +107,8 @@ def generateCleanFile(files, training_file_name):
 	df_merged_set = label_column(df_merged_set, 'container_id')
 
 	logging.info("Dataframe Shape "+str(df_merged_set.shape))
-	with open(training_file_name, 'wb') as file:
-		df_merged_set.to_pickle(file, compression=None)
+	with open(training_file_name, 'w') as file:
+		df_merged_set.to_csv(file, chunksize=CHUNKSIZE, encoding='ISO-8859-1')
 	logging.info('File Created')
 
 
@@ -169,9 +171,10 @@ def trainModel(learning_rate, max_depth, training_file_name):
 			# Takes in the intially model and produces a better one
 			xg_reg = xgb.train(learning_params, dataMatrix, 200, xgb_model=xg_reg)
 		chunkcount = chunkcount + 1
-		logging.info("Model saved "+str(xg_reg))	
+		logging.info("Model saved "+str(xg_reg))
 
 	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep)
+	predict(training_file_name, xg_reg)
 	return
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
@@ -183,10 +186,10 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
 	
 	column_filename =  '/data/models/XGB_MODEL_COLUMN_{}.sav'
 	column_filename = column_filename.format(timestamp_value)
-	pickle.dump(columns_to_keep, open(column_filename, 'w'))
+	pickle.dump(columns_to_keep, open(column_filename, 'wb'))
 	logging.info("Model and columns are saved")
 
-def predict(training_file_name):
+def predict(training_file_name, xg_reg):
 
 	YColumns = ['result']
 	numericCols = ['impressions', 'guarantee_percentage', 'container_id_label']
@@ -208,6 +211,17 @@ def predict(training_file_name):
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
+		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
+		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,2:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
+
+		predictions = xg_reg.predict(dataMatrix)
+
+		# Result Analysis for Chunk
+		results = pd.DataFrame({'actual': OUTPUT, 'predict': predictions})
+		matrix = confusion_matrix(OUTPUT, np.around(predictions))
+		print('Accuracy Score :',accuracy_score(OUTPUT, np.around(predictions))) 
+		print('Report : ')
+		print(classification_report(OUTPUT, np.around(predictions))) 
 
 	return
 
