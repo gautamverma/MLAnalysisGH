@@ -100,11 +100,27 @@ def generateCleanFile(files, training_file_name):
 	# Generate the unique set and map values
 	df_merged_set = label_column(df_merged_set, 'container_id')
 
+	logging.info("Dataframe Shape "+str(df_merged_set.shape))
 	with open(training_file_name, 'w') as csv_file:
-		df_merged_set.to_csv(path_or_buf=csv_file, index=False, encoding='utf-8')
+		df_merged_set.to_csv(path_or_buf=csv_file, index=False, encoding='utf-8', chunksize=CHUNKSIZE)
 	logging.info('File Created')
 
 def trainModel(learning_rate, max_depth, training_file_name):
+
+
+	YColumns = ['result']
+	numericCols = ['impressions', 'guarantee_percentage', 'container_id_label']
+	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
+						'component_display_name', 'targeted', 'site']
+
+
+	startOneHotIndex = len(YColumns) + len(numericalCols)
+	columns_to_keep = YColumns + numericalCols + categoricalCols
+
+	# Get all rows where weblab is missing
+	df_merged_without_weblab = df_merged_set.where(df_merged_set['weblab']=="missing")
+	df_merged_set_test = df_merged_without_weblab[columns_to_keep]
+
 	return
 
 def startSteps(learning_rate, max_depth):
@@ -117,7 +133,7 @@ def startSteps(learning_rate, max_depth):
 			]
 	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile.csv'
 	generateCleanFile(files, training_file_name)
-	trainModel(learning_rate, max_depth, training_file_name)
+	#trainModel(learning_rate, max_depth, training_file_name)
 
 def __main__():
 	# count the arguments
