@@ -168,7 +168,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		logging.info('Weblab Removed')
 
-		logging.info("Shape before removal " + df_merged_set_test.shape);
+		logging.info("Shape before removal " + str(df_merged_set_test.shape));
 		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
 		logging.info(df_merged_set_test.shape);
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
