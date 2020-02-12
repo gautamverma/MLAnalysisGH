@@ -164,7 +164,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info('Weblab Removed')
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 
-		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
+		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,2:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
 		if(chunkcount==1):
@@ -176,7 +176,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info("Model saved "+str(xg_reg))
 
 	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep)
-	predict(training_file_name, one_hot_encoder, xg_reg)
+	predict(training_file_name, OneHotEncoder, xg_reg)
 	return
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
@@ -191,7 +191,7 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
 	pickle.dump(columns_to_keep, open(column_filename, 'wb'))
 	logging.info("Model and columns are saved")
 
-def predict(training_file_name, one_hot_encoder, xg_reg):
+def predict(training_file_name, OneHotEncoder, xg_reg):
 
 	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
@@ -213,7 +213,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
-		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
+		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,2:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
 		predictions = xg_reg.predict(dataMatrix)
