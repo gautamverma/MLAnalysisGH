@@ -127,7 +127,8 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	df = removeNaN(df, categoricalCols)
 	logging.info(df.shape)
 	df = df[categoricalCols]
-	return one_hot_encoder.fit(df)
+	one_hot_encoder.fit(df)
+	return one_hot_encoder
 
 def trainModel(learning_rate, max_depth, training_file_name):
 
