@@ -30,7 +30,7 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
 # Batch size of 10000
-CHUNKSIZE = 1000
+CHUNKSIZE = 1000000
 TRAIN_ITERATION = 30
 
 CONSTANT_FILLER = 'missing'
