@@ -124,9 +124,9 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder = OneHotEncoder(sparse=False)
 
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
+	df = df[categoricalCols]
 	df = removeNaN(df, categoricalCols)
 	logging.info(df.shape)
-	df = df[categoricalCols]
 	one_hot_encoder.fit(df)
 	return one_hot_encoder
 
@@ -168,11 +168,13 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		logging.info('Weblab Removed')
 
-		logging.info(df_merged_set_test.shape);
+		logging.info("Shape before removal " + df_merged_set_test.shape);
 		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
 		logging.info(df_merged_set_test.shape);
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 
+		logging.info(str(INPUT.head()))
+		logging.info(str(startOneHotIndex))
 		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
 		logging.info('One hot encoding done')
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
