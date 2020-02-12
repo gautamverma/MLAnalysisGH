@@ -113,15 +113,18 @@ def label_result(row):
 		return 1
 	return 0
 
+def removeNaN(df, categoricalCols):
+	# Replace any NaN values
+	for col in categoricalCols:
+		df[[col]] = df[[col]].fillna(value=CONSTANT_FILLER)
+	return df
+
 # Build the One hot encoder using all data
 def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder = OneHotEncoder(sparse=False)
 
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
-	# Replace any NaN values
-	for col in categoricalCols:
-		df[[col]] = df[[col]].fillna(value=CONSTANT_FILLER)
-
+	df = removeNaN(df, categoricalCols)
 	df = df[categoricalCols]
 	return one_hot_encoder.fit(df)
 
@@ -162,9 +165,12 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing")
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		logging.info('Weblab Removed')
+
+		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 
 		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
+		logging.info('One hot encoding done')
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,2:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
 		if(chunkcount==1):
@@ -212,8 +218,11 @@ def predict(training_file_name, OneHotEncoder, xg_reg):
 		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing")
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		
+		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
+		
 		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
+		
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,2:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
 		predictions = xg_reg.predict(dataMatrix)
