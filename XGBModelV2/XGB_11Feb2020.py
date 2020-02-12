@@ -239,7 +239,6 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 		
 		logging.info(str(INPUT.columns))
-		logging.info(str(OUTPUT.columns))
 
 		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
