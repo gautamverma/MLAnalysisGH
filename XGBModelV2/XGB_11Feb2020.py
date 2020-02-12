@@ -95,7 +95,7 @@ def generateCleanFile(files, training_file_name):
 
 	with open(training_file_name, 'w') as csv_file:
 		df_merged_set.to_csv(path_or_buf=csv_file, index=False)
-    logging.info('File Created')
+	logging.info('File Created')
 
 def trainModel(learning_rate, max_depth, training_file_name):
 	return
