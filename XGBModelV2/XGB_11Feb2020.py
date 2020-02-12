@@ -169,13 +169,12 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info('Weblab Removed')
 
 		logging.info("Shape before removal " + str(df_merged_set_test.shape));
-		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
-		logging.info(df_merged_set_test.shape);
 		INPUT, ONEHOT, OUTPUT = df_merged_set_test.iloc[:,1:4], df_merged_set_test.iloc[:,4:],  df_merged_set_test.iloc[:,0]
 
 		logging.info(str(INPUT.columns))
 		logging.info(str(ONEHOT.columns))
-
+		
+		ONEHOT = removeNaN(ONEHOT, categoricalCols)
 		one_hot_encoded = one_hot_encoder.transform(ONEHOT)
 		logging.info('One hot encoding done')
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT, one_hot_encoded)), label=OUTPUT)
