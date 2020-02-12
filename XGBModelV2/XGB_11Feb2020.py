@@ -69,7 +69,7 @@ def label_column(df, column):
 	
 	unique_container_id_hash = {}
 	position = 1
-	for val in unique_list:
+	for val in unique_container_id_list:
 		unique_container_id_hash[val] = position
 		position = position + 1
 
