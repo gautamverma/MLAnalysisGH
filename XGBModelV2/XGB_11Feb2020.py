@@ -126,7 +126,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
 	df = df[categoricalCols]
 	df = removeNaN(df, categoricalCols)
-	logging.info(df.shape)
+	logging.info(str(df.columns))
 	one_hot_encoder.fit(df)
 	return one_hot_encoder
 
@@ -175,7 +175,6 @@ def trainModel(learning_rate, max_depth, training_file_name):
 
 		logging.info(str(INPUT.columns))
 		logging.info(str(ONEHOT.columns))
-		logging.info(str(OUTPUT.columns))
 
 		one_hot_encoded = OneHotEncoder.transform(ONEHOT)
 		logging.info('One hot encoding done')
