@@ -30,7 +30,7 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
 # Batch size of 10000
-CHUNKSIZE = 1000000
+CHUNKSIZE = 1000
 TRAIN_ITERATION = 30
 
 CONSTANT_FILLER = 'missing'
@@ -152,7 +152,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 	startOneHotIndex = len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 
-	OneHotEncoder = buildOneHotEncoder(training_file_name, categoricalCols)
+	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
 	logging.info('One hot encoder')
 
 	chunkcount = 1
@@ -176,7 +176,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info(str(INPUT.columns))
 		logging.info(str(ONEHOT.columns))
 
-		one_hot_encoded = OneHotEncoder.transform(ONEHOT)
+		one_hot_encoded = one_hot_encoder.transform(ONEHOT)
 		logging.info('One hot encoding done')
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT, one_hot_encoded)), label=OUTPUT)
 
@@ -189,7 +189,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info("Model saved "+str(xg_reg))
 
 	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep)
-	predict(training_file_name, OneHotEncoder, xg_reg)
+	predict(training_file_name, one_hot_encoder, xg_reg)
 	return
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
@@ -204,7 +204,7 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
 	pickle.dump(columns_to_keep, open(column_filename, 'wb'))
 	logging.info("Model and columns are saved")
 
-def predict(training_file_name, OneHotEncoder, xg_reg):
+def predict(training_file_name, one_hot_encoder, xg_reg):
 
 	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
@@ -228,7 +228,7 @@ def predict(training_file_name, OneHotEncoder, xg_reg):
 		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 		
-		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
+		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
 		
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
