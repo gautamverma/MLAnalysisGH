@@ -161,8 +161,11 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info('Starting Training - '+str(chunkcount))
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
 
+		# Fill All Categorical Missing Values
+		chunk = removeNaN(chunk, categoricalCols)
+
 		# Get all rows where weblab is missing
-		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing")
+		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing").dropna()
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		logging.info('Weblab Removed')
 
@@ -175,7 +178,6 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info(str(INPUT.columns))
 		logging.info(str(ONEHOT.columns))
 
-		ONEHOT = removeNaN(ONEHOT, categoricalCols)
 		one_hot_encoded = one_hot_encoder.transform(ONEHOT)
 		logging.info('One hot encoding done')
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:], one_hot_encoded)), label=OUTPUT)
