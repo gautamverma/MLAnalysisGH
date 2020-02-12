@@ -125,6 +125,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
 	df = removeNaN(df, categoricalCols)
+	logging.info(df.shape)
 	df = df[categoricalCols]
 	return one_hot_encoder.fit(df)
 
@@ -147,7 +148,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
 						'component_display_name', 'customer_targeting', 'site']
 
-	startOneHotIndex = len(YColumns) + len(numericalCols)
+	startOneHotIndex = len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 
 	OneHotEncoder = buildOneHotEncoder(training_file_name, categoricalCols)
@@ -166,12 +167,14 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		logging.info('Weblab Removed')
 
+		logging.info(df_merged_set_test.shape);
 		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
+		logging.info(df_merged_set_test.shape);
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 
 		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
 		logging.info('One hot encoding done')
-		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,2:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
+		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
 		if(chunkcount==1):
 			xg_reg = xgb.train(learning_params, dataMatrix, 200)
@@ -204,7 +207,7 @@ def predict(training_file_name, OneHotEncoder, xg_reg):
 	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
 						'component_display_name', 'customer_targeting', 'site']
 
-	startOneHotIndex = len(YColumns) + len(numericalCols)
+	startOneHotIndex = len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 
 	chunkcount = 1
@@ -223,7 +226,7 @@ def predict(training_file_name, OneHotEncoder, xg_reg):
 		
 		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
 		
-		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,2:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
+		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
 		predictions = xg_reg.predict(dataMatrix)
 
