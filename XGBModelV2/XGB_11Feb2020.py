@@ -159,7 +159,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
 
 		# Get all rows where weblab is missing
-		df_merged_without_weblab = chunk.where(df_merged_set['weblab']=="missing")
+		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing")
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		logging.info('Weblab Removed')
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
@@ -209,7 +209,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
 		# Get all rows where weblab is missing
-		df_merged_without_weblab = chunk.where(df_merged_set['weblab']=="missing")
+		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing")
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
