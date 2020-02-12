@@ -171,13 +171,15 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info("Shape before removal " + str(df_merged_set_test.shape));
 		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
 		logging.info(df_merged_set_test.shape);
-		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
+		INPUT, ONEHOT, OUTPUT = df_merged_set_test.iloc[:,1:4], df_merged_set_test.iloc[:,4:],  df_merged_set_test.iloc[:,0]
 
-		logging.info(str(INPUT.head()))
-		logging.info(str(startOneHotIndex))
-		one_hot_encoded = OneHotEncoder.transform(INPUT.iloc[:,startOneHotIndex:])
+		logging.info(str(INPUT.columns))
+		logging.info(str(ONEHOT.columns))
+		logging.info(str(OUTPUT.columns))
+
+		one_hot_encoded = OneHotEncoder.transform(ONEHOT)
 		logging.info('One hot encoding done')
-		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
+		dataMatrix = xgb.DMatrix(np.column_stack((INPUT, one_hot_encoded)), label=OUTPUT)
 
 		if(chunkcount==1):
 			xg_reg = xgb.train(learning_params, dataMatrix, 200)
