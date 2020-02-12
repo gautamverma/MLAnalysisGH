@@ -249,6 +249,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 
 		# Result Analysis for Chunk
 		matrix = confusion_matrix(OUTPUT, np.around(predictions))
+		print('Confusion Matrix :', str(matrix)) 
 		print('Accuracy Score :',accuracy_score(OUTPUT, np.around(predictions))) 
 		print('Report : ')
 		print(classification_report(OUTPUT, np.around(predictions))) 
