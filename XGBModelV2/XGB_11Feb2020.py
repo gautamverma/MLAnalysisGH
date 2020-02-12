@@ -151,7 +151,6 @@ def trainModel(learning_rate, max_depth, training_file_name):
 
 	startOneHotIndex = len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
-
 	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
 	logging.info('One hot encoder')
 
@@ -169,15 +168,18 @@ def trainModel(learning_rate, max_depth, training_file_name):
 		logging.info('Weblab Removed')
 
 		logging.info("Shape before removal " + str(df_merged_set_test.shape));
-		INPUT, ONEHOT, OUTPUT = df_merged_set_test.iloc[:,1:4], df_merged_set_test.iloc[:,4:],  df_merged_set_test.iloc[:,0]
+
+		INPUT = df_merged_set_test[numericalCols]
+		ONEHOT = df_merged_set_test[categoricalCols]
+		OUTPUT = df_merged_set_test[YColumns]
 
 		logging.info(str(INPUT.columns))
 		logging.info(str(ONEHOT.columns))
-		
+
 		ONEHOT = removeNaN(ONEHOT, categoricalCols)
 		one_hot_encoded = one_hot_encoder.transform(ONEHOT)
 		logging.info('One hot encoding done')
-		dataMatrix = xgb.DMatrix(np.column_stack((INPUT, one_hot_encoded)), label=OUTPUT)
+		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:], one_hot_encoded)), label=OUTPUT)
 
 		if(chunkcount==1):
 			xg_reg = xgb.train(learning_params, dataMatrix, 200)
