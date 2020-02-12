@@ -231,7 +231,7 @@ def startSteps(learning_rate, max_depth):
 			]
 	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile'
 	generateCleanFile(files, training_file_name)
-	#trainModel(learning_rate, max_depth, training_file_name)
+	trainModel(learning_rate, max_depth, training_file_name)
 
 def __main__():
 	# count the arguments
