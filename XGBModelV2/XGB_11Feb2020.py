@@ -129,7 +129,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder.fit(df)
 	return one_hot_encoder
 
-def trainModel(learning_rate, max_depth, training_file_name):
+def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 
 	learning_params = {
 	    'objective' : 'binary:logistic',
@@ -152,6 +152,12 @@ def trainModel(learning_rate, max_depth, training_file_name):
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
 	logging.info('One hot encoder')
+
+	#Model present then load and predict
+	if path.exists(model_filename):
+		xg_reg = pickle.load(open(model_filename, 'rb'))
+		predict(training_file_name, one_hot_encoder, xg_reg)
+		return
 
 	chunkcount = 1
 	for chunk in pd.read_csv(training_file_name, chunksize=CHUNKSIZE):
@@ -210,7 +216,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 
 	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
-	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
+	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
 						'component_display_name', 'customer_targeting', 'site']
 
 	startOneHotIndex = len(numericalCols)
@@ -223,21 +229,25 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 			continue
 
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
+		# Fill All Categorical Missing Values
+		chunk = removeNaN(chunk, categoricalCols)
+
 		# Get all rows where weblab is missing
-		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing")
+		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing").dropna()
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		
-		df_merged_set_test = removeNaN(df_merged_set_test, categoricalCols)
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 		
+		logging.info(str(INPUT.columns))
+		logging.info(str(OUTPUT.columns))
+
 		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
-		
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
 		predictions = xg_reg.predict(dataMatrix)
+		chunkcount = chunkcount + 1
 
 		# Result Analysis for Chunk
-		results = pd.DataFrame({'actual': OUTPUT, 'predict': predictions})
 		matrix = confusion_matrix(OUTPUT, np.around(predictions))
 		print('Accuracy Score :',accuracy_score(OUTPUT, np.around(predictions))) 
 		print('Report : ')
@@ -253,9 +263,11 @@ def startSteps(learning_rate, max_depth):
 			'/data/s3_file/FE/18January03FebPP000',
 			'/data/s3_file/FE/18January03FebCreative000'
 			]
-	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile'
+	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile'	
+	model_filename = '/data/models/XGB_MODEL_0.3_32_1581526059.sav'
+
 	generateCleanFile(files, training_file_name)
-	trainModel(learning_rate, max_depth, training_file_name)
+	trainModel(learning_rate, max_depth, training_file_name, model_filename)
 
 def __main__():
 	# count the arguments
