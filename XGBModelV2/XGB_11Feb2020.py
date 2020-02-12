@@ -42,9 +42,6 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 		raise RuntimeError("Column can't be null. Please give the column value")
 	return pd.merge(df1, df2, on=column, how=joinType);
 
-def fillna(df, column, defValue):
-	df[[column]] = df[[column]].fillna(value=defValue)
-
 def loadAndMerge(files):
 	# placement_metrics_file  {0}
 	# placement_metadata_file {1}
@@ -107,8 +104,7 @@ def generateCleanFile(files, training_file_name):
 	df_merged_set = label_column(df_merged_set, 'container_id')
 
 	logging.info("Dataframe Shape "+str(df_merged_set.shape))
-	with open(training_file_name, 'w') as file:
-		df_merged_set.to_csv(file, chunksize=CHUNKSIZE, encoding='ISO-8859-1')
+	df_merged_set.to_csv(training_file_name, index=False, encoding='ISO-8859-1')
 	logging.info('File Created')
 
 
