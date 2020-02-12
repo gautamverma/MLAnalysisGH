@@ -28,7 +28,9 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
 # Batch size of 10000
-CHUNKSIZE = 100000
+CHUNKSIZE = 1000000
+TRAIN_ITERATION = 30
+
 CONSTANT_FILLER = 'missing'
 ALL_CONSUMER    = 'allCustomer'
 IMPRESSION_COUNT = 10
@@ -103,7 +105,7 @@ def generateCleanFile(files, training_file_name):
 	df_merged_set = label_column(df_merged_set, 'container_id')
 
 	logging.info("Dataframe Shape "+str(df_merged_set.shape))
-	with open(training_file_name, 'w') as file:
+	with open(training_file_name, 'wb') as file:
 		df_merged_set.to_pickle(file, compression=None)
 	logging.info('File Created')
 
@@ -145,27 +147,67 @@ def trainModel(learning_rate, max_depth, training_file_name):
 
 	OneHotEncoder = buildOneHotEncoder(training_file_name, categoricalCols)
 
+	chunkcount = 1
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
-
-		columns_to_keep = YColumns + numericalCols + categoricalCols
+		# Train on a part of dataset and predict on other
+		if(chunkcount>TRAIN_ITERATION):
+			break
+		
+		df_merged_set_test['result'] = df_merged_set_test.apply (lambda row: label_result(row), axis=1)
 		# Get all rows where weblab is missing
 		df_merged_without_weblab = chunk.where(df_merged_set['weblab']=="missing")
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
-
-		df_merged_set_test['result'] = df_merged_set_test.apply (lambda row: label_result(row), axis=1)
 		
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
-		x_train, x_test, y_train, y_test = train_test_split(INPUT, OUTPUT, test_size = 0.2)
 
-		one_hot_encoded = one_hot_encoder.transform(x_train.iloc[:,2:])
-		dataMatrix = xgb.DMatrix(np.column_stack((x_train.iloc[:,1], one_hot_encoded)), label=y_train)
+		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
+		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,2:startOneHotIndex], one_hot_encoded)), label=OUTPUT)
 
 		if(chunkcount==1):
 			xg_reg = xgb.train(learning_params, dataMatrix, 200)
 		else:
 			# Takes in the intially model and produces a better one
 			xg_reg = xgb.train(learning_params, dataMatrix, 200, xgb_model=xg_reg)
+		chunkcount = chunkcount + 1
 		logging.info("Model saved "+str(xg_reg))	
+
+	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep)
+	return
+
+def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
+
+	model_filename =  '/data/models/XGB_MODEL_{}_{}_{}.sav'
+	timestamp_value = int(datetime.datetime.now().timestamp())
+	model_filename  = model_filename.format(learning_rate_val, max_depth_val, timestamp_value) 
+	pickle.dump(xg_reg, open(model_filename, 'wb'))
+	
+	column_filename =  '/data/models/XGB_MODEL_COLUMN_{}.sav'
+	column_filename = column_filename.format(timestamp_value)
+	pickle.dump(columns_to_keep, open(column_filename, 'w'))
+	logging.info("Model and columns are saved")
+
+def predict(training_file_name):
+
+	YColumns = ['result']
+	numericCols = ['impressions', 'guarantee_percentage', 'container_id_label']
+	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
+						'component_display_name', 'customer_targeting', 'site']
+
+	startOneHotIndex = len(YColumns) + len(numericalCols)
+	columns_to_keep = YColumns + numericalCols + categoricalCols
+
+	chunkcount = 1
+	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
+		if(chunkcount<=TRAIN_ITERATION):
+			chunkcount = chunkcount + 1
+			continue
+
+		df_merged_set_test['result'] = df_merged_set_test.apply (lambda row: label_result(row), axis=1)
+		# Get all rows where weblab is missing
+		df_merged_without_weblab = chunk.where(df_merged_set['weblab']=="missing")
+		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
+		
+		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 
 	return
 
