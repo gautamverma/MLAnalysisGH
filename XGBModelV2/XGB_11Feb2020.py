@@ -63,8 +63,19 @@ def loadAndMerge(files):
 	return df_merged_set
 
 
-def label_column(row, unique_values, column):
-    return unique_values.index(row[column])
+def label_column(df, column):
+	# TODO Make it general
+	unique_container_id_list = df.container_id.unique().tolist()
+	
+	unique_container_id_hash = {}
+	position = 1
+	for val in unique_list:
+		unique_container_id_hash[val] = position
+		position = position + 1
+
+	df['container_id_label'] = df.apply (lambda row: unique_container_id_hash[row[column]], axis=1)
+	logging.info('Label done for '+ column)
+	return df
 
 def generateCleanFile(files, training_file_name):
 
@@ -87,11 +98,7 @@ def generateCleanFile(files, training_file_name):
 	logging.info('Creative Columns Cleaned');
 
 	# Generate the unique set and map values
-	unique_container_ids = df_merged_set.container_id.unique().tolist()
-	logging.info("unique set created")
-	df_merged_set['container_id_label'] = df_merged_set.apply (lambda row: label_column(row, unique_container_ids, 'container_id'), axis=1)
-	logging.info('Label done for container_id')
-	logging.info(df_merged_set.head())
+	df_merged_set = label_column(df_merged_set, 'container_id')
 
 	with open(training_file_name, 'w') as csv_file:
 		df_merged_set.to_csv(path_or_buf=csv_file, index=False)
