@@ -118,6 +118,10 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder = OneHotEncoder(sparse=False)
 
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
+	# Replace any NaN values
+	for col in categoricalCols:
+		df[[col]] = df[[col]].fillna(value=CONSTANT_FILLER)
+
 	df = df[categoricalCols]
 	return one_hot_encoder.fit(df)
 
@@ -144,13 +148,14 @@ def trainModel(learning_rate, max_depth, training_file_name):
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 
 	OneHotEncoder = buildOneHotEncoder(training_file_name, categoricalCols)
+	logging.info('One hot encoder')
 
 	chunkcount = 1
 	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
 		# Train on a part of dataset and predict on other
 		if(chunkcount>TRAIN_ITERATION):
 			break
-		
+		logging.info('Starting Training - '+str(chunkcount))
 		df_merged_set_test['result'] = df_merged_set_test.apply (lambda row: label_result(row), axis=1)
 		# Get all rows where weblab is missing
 		df_merged_without_weblab = chunk.where(df_merged_set['weblab']=="missing")
