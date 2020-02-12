@@ -31,6 +31,7 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 CHUNKSIZE = 100000
 CONSTANT_FILLER = 'missing'
 ALL_CONSUMER    = 'allCustomer'
+IMPRESSION_COUNT = 10
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:
@@ -81,6 +82,7 @@ def generateCleanFile(files, training_file_name):
 
 	if path.exists(training_file_name):
 		logging.info("Training file is already present")
+		return
 
 	df_merged_set = loadAndMerge(files)
 	logging.info("Loading and dataset merged. Display head-- ")
@@ -101,25 +103,69 @@ def generateCleanFile(files, training_file_name):
 	df_merged_set = label_column(df_merged_set, 'container_id')
 
 	logging.info("Dataframe Shape "+str(df_merged_set.shape))
-	with open(training_file_name, 'w') as csv_file:
-		df_merged_set.to_pickle(csv_file)
+	with open(training_file_name, 'w') as file:
+		df_merged_set.to_pickle(file, compression=None)
 	logging.info('File Created')
+
+
+def label_result(row):
+	if(row['impressions']>IMPRESSION_COUNT):
+		return 1
+	return 0
+
+# Build the One hot encoder using all data
+def buildOneHotEncoder(training_file_name, categoricalCols):
+	one_hot_encoder = OneHotEncoder(sparse=False)
+
+	df = pd.read_pickle(training_file_name)
+	df = df[categoricalCols]
+	return one_hot_encoder.fit(df)
 
 def trainModel(learning_rate, max_depth, training_file_name):
 
+	learning_params = {
+	    'objective' : 'binary:logistic',
+	    'colsample_bytree' : 0.3,
+	    'learning_rate' : learning_rate, 
+	    'max_depth' : max_depth,
+	    'alpha' : 5,
+	    'n_estimators' : 200
+	}
+
+	# Init a base Model
+	xg_reg = {}
 
 	YColumns = ['result']
 	numericCols = ['impressions', 'guarantee_percentage', 'container_id_label']
 	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
-						'component_display_name', 'targeted', 'site']
-
+						'component_display_name', 'customer_targeting', 'site']
 
 	startOneHotIndex = len(YColumns) + len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 
-	# Get all rows where weblab is missing
-	df_merged_without_weblab = df_merged_set.where(df_merged_set['weblab']=="missing")
-	df_merged_set_test = df_merged_without_weblab[columns_to_keep]
+	OneHotEncoder = buildOneHotEncoder(training_file_name, categoricalCols)
+
+	for chunk in pd.read_csv(training_data_file, chunksize=CHUNKSIZE):
+
+		columns_to_keep = YColumns + numericalCols + categoricalCols
+		# Get all rows where weblab is missing
+		df_merged_without_weblab = chunk.where(df_merged_set['weblab']=="missing")
+		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
+
+		df_merged_set_test['result'] = df_merged_set_test.apply (lambda row: label_result(row), axis=1)
+		
+		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
+		x_train, x_test, y_train, y_test = train_test_split(INPUT, OUTPUT, test_size = 0.2)
+
+		one_hot_encoded = one_hot_encoder.transform(x_train.iloc[:,2:])
+		dataMatrix = xgb.DMatrix(np.column_stack((x_train.iloc[:,1], one_hot_encoded)), label=y_train)
+
+		if(chunkcount==1):
+			xg_reg = xgb.train(learning_params, dataMatrix, 200)
+		else:
+			# Takes in the intially model and produces a better one
+			xg_reg = xgb.train(learning_params, dataMatrix, 200, xgb_model=xg_reg)
+		logging.info("Model saved "+str(xg_reg))	
 
 	return
 
@@ -131,7 +177,7 @@ def startSteps(learning_rate, max_depth):
 			'/data/s3_file/FE/18January03FebPP000',
 			'/data/s3_file/FE/18January03FebCreative000'
 			]
-	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile.csv'
+	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile'
 	generateCleanFile(files, training_file_name)
 	#trainModel(learning_rate, max_depth, training_file_name)
 
