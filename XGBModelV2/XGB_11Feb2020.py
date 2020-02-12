@@ -117,7 +117,7 @@ def label_result(row):
 def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder = OneHotEncoder(sparse=False)
 
-	df = pd.read_pickle(training_file_name)
+	df = pd.read_csv(training_file_name, skiprows=0, header=0)
 	df = df[categoricalCols]
 	return one_hot_encoder.fit(df)
 
