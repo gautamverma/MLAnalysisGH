@@ -104,7 +104,7 @@ def generateCleanFile(files, training_file_name):
 	df_merged_set = label_column(df_merged_set, 'container_id')
 
 	logging.info("Dataframe Shape "+str(df_merged_set.shape))
-	df_merged_set.to_csv(training_file_name, index=False, encoding='ISO-8859-1')
+	df_merged_set.to_csv(training_file_name, index=False, encoding='utf-8')
 	logging.info('File Created')
 
 
@@ -136,7 +136,7 @@ def trainModel(learning_rate, max_depth, training_file_name):
 	xg_reg = {}
 
 	YColumns = ['result']
-	numericCols = ['impressions', 'guarantee_percentage', 'container_id_label']
+	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
 	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
 						'component_display_name', 'customer_targeting', 'site']
 
@@ -188,7 +188,7 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
 def predict(training_file_name, xg_reg):
 
 	YColumns = ['result']
-	numericCols = ['impressions', 'guarantee_percentage', 'container_id_label']
+	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
 	categoricalCols = [ 'slot_names', 'container_type', 'component_name', 'component_namespace',
 						'component_display_name', 'customer_targeting', 'site']
 
