@@ -72,7 +72,8 @@ def generateCleanFile(files, training_file_name):
 		return pd.read_csv(training_file_name, skiprows=0, header=0)
 
 	df_merged_set = loadAndMerge(files)
-	logging.info("Loading and dataset merged")
+	logging.info("Loading and dataset merged. Display head--")
+	logging.info(df_merged_set.head())
 
 	# Clean few Columns 
 	# Targetting Columns
@@ -89,10 +90,12 @@ def generateCleanFile(files, training_file_name):
 	unique_container_ids = df_merged_set.container_id.unique().tolist()
 	logging.info("unique set created")
 	df_merged_set['container_id_label'] = df_merged_set.apply (lambda row: label_column(row, unique_container_ids, 'container_id'), axis=1)
+	logging.info('Label done for container_id')
 	logging.info(df_merged_set.head())
 
-	df_merged_set.to_csv(training_file_name)
-
+	with open(training_file_name, 'w') as csv_file:
+		df_merged_set.to_csv(path_or_buf=csv_file, index=False)
+    logging.info('File Created')
 
 def trainModel(learning_rate, max_depth, training_file_name):
 	return
