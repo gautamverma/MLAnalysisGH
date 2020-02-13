@@ -138,6 +138,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 
 def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 
+	logging.info("Training for placements impressions < "+str(IMPRESSION_COUNT))
 	learning_params = {
 	    'objective' : 'binary:logistic',
 	    'colsample_bytree' : 0.3,
@@ -295,6 +296,7 @@ def __main__():
 	# count the arguments
 	if len(sys.argv) < 4:
 		raise RuntimeError("Please provide the learning_rate, max_depth and impressions count filter")
+	logging.info(str(sys.argv))
 	IMPRESSION_COUNT = int(sys.argv[3])
 	startSteps(sys.argv[1], sys.argv[2])
 
