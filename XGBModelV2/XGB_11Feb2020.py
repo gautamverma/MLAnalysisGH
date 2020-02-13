@@ -182,7 +182,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 
 		INPUT = df_merged_set_test[numericalCols]
 		# guarantee_percentage nan replaced by missing so change back
-		INPUT.replace(CONSTANT_FILLER, NUMERIC_FILLER)
+		INPUT.replace(CONSTANT_FILLER, NUMERIC_FILLER, inplace=True)
 
 		ONEHOT = df_merged_set_test[categoricalCols]
 		OUTPUT = df_merged_set_test[YColumns]
@@ -251,7 +251,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 		df_merged_set_test = df_merged_set_test[columns_to_keep]	
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 		
-		INPUT.iloc[:,1].replace(CONSTANT_FILLER, NUMERIC_FILLER)
+		INPUT.iloc[:,1].replace(CONSTANT_FILLER, NUMERIC_FILLER, inplace=True)
 		logging.info(str(INPUT.columns))
 
 		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
