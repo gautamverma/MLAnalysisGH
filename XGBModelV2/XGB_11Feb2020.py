@@ -34,6 +34,8 @@ CHUNKSIZE = 1000000
 TRAIN_ITERATION = 30
 
 CONSTANT_FILLER = 'missing'
+NUMERIC_FILLER = 0
+
 ALL_CONSUMER    = 'allCustomer'
 IMPRESSION_COUNT = 10
 
@@ -167,15 +169,16 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 		logging.info('Starting Training - '+str(chunkcount))
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
 
+		# Get only the columns to evaluate
+		chunk = chunk[columns_to_keep + ['weblab']]
+
 		# Fill All Categorical Missing Values
-		chunk = removeNaN(chunk, categoricalCols)
+		chunk = removeNaN(chunk, YColumns + numericalCols, NUMERIC_FILLER)
+		chunk = removeNaN(chunk, categoricalCols, CONSTANT_FILLER)
 
 		# Get all rows where weblab is missing
-		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing").dropna()
-		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
-		logging.info('Weblab Removed')
-
-		logging.info("Shape before removal " + str(df_merged_set_test.shape));
+		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
+		logging.info('Weblab Removed: Shape - '+str(df_merged_set_test.shape))
 
 		INPUT = df_merged_set_test[numericalCols]
 		ONEHOT = df_merged_set_test[categoricalCols]
@@ -229,14 +232,19 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 			continue
 
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
-		# Fill All Categorical Missing Values
-		chunk = removeNaN(chunk, categoricalCols)
+		
+		# Get only the columns to evaluate
+		chunk = chunk[columns_to_keep + ['weblab']]
+
+		# Fill all Missing Values so dropna doesn't remove any row
+		chunk = removeNaN(chunk, YColumns + numericalCols, NUMERIC_FILLER)
+		chunk = removeNaN(chunk, categoricalCols, CONSTANT_FILLER)
 
 		# Get all rows where weblab is missing
-		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing").dropna()
+		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
 		logging.info("Count to predict " + str(df_merged_without_weblab.shape))
-		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		
+		df_merged_set_test = df_merged_set_test[columns_to_keep]	
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 		
 		logging.info(str(INPUT.columns))

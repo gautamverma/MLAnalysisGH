@@ -21,13 +21,34 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 # Log time-level and message for getting a running estimate
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+CONSTANT_FILLER = 'missing'
+NUMERIC_FILLER = 0
+
+def removeNaN(df, categoricalCols):
+	# Replace any NaN values
+	for col in categoricalCols:
+		df[[col]] = df[[col]].fillna(value=CONSTANT_FILLER)
+	return df
+
 
 def exploreFile(filename):
-	df = pd.read_csv(training_file_name, skiprows=0, header=0)
+	df = pd.read_csv(filename, skiprows=0, header=0)
 
 	logging.info("Shape "+str(df.shape))
-
 	logging.info(str(df.weblab.value_counts()))
+
+	YColumns = ['result']
+	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
+	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
+						'component_display_name', 'customer_targeting', 'site']
+
+	columns_to_keep = YColumns + numericalCols + categoricalCols
+	df = df[columns_to_keep + ['weblab']]
+
+	# Fill all Missing Values so dropna doesn't remove any row
+	df = removeNaN(df, YColumns + numericalCols, NUMERIC_FILLER)
+	df = removeNaN(df, categoricalCols, CONSTANT_FILLER)
+
 	logging.info("weblab missing data count : "+ str(df.where(df['weblab']=='missing').dropna().shape))
 
 	filter10less = df['impressions']<10
