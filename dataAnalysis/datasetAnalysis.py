@@ -6,7 +6,6 @@ import datetime
 from os import path
 import pandas as pd
 import numpy as np
-import xgboost as xgb
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -56,7 +55,7 @@ def __main__():
 	# count the arguments
 	if len(sys.argv) < 2:
 		raise RuntimeError("Please provide the filename")
-	startSteps(sys.argv[1])
+	exploreFile(sys.argv[1])
 
 #This is required to call the main function
 if __name__ == "__main__":
