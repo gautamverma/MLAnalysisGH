@@ -157,6 +157,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 
 	#Model present then load and predict
 	if path.exists(model_filename):
+		logging.info("Model file present. Skipping to predication::")
 		xg_reg = pickle.load(open(model_filename, 'rb'))
 		predict(training_file_name, one_hot_encoder, xg_reg)
 		return
@@ -178,6 +179,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 
 		# Get all rows where weblab is missing
 		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
+		df_merged_set_test = df_merged_set_test[columns_to_keep]
 		logging.info('Weblab Removed: Shape - '+str(df_merged_set_test.shape))
 
 		INPUT = df_merged_set_test[numericalCols]
@@ -237,11 +239,12 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 		chunk = chunk[columns_to_keep + ['weblab']]
 
 		# Fill all Missing Values so dropna doesn't remove any row
-		chunk = removeNaN(chunk, YColumns + numericalCols, NUMERIC_FILLER)
+		chunk = removeNaN(chunk, numericalCols, NUMERIC_FILLER)
 		chunk = removeNaN(chunk, categoricalCols, CONSTANT_FILLER)
 
 		# Get all rows where weblab is missing
 		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
+		df_merged_set_test = df_merged_set_test[columns_to_keep]
 		logging.info("Count to predict " + str(df_merged_without_weblab.shape))
 		
 		df_merged_set_test = df_merged_set_test[columns_to_keep]	
@@ -272,7 +275,7 @@ def startSteps(learning_rate, max_depth):
 			'/data/s3_file/FE/18January03FebPP000',
 			'/data/s3_file/FE/18January03FebCreative000'
 			]
-	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile'	
+	training_file_name = ''	
 	model_filename = '/data/models/XGB_MODEL_0.3_32_1581526059.sav'
 
 	generateCleanFile(files, training_file_name)
