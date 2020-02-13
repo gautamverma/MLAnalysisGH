@@ -126,7 +126,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder = OneHotEncoder(sparse=False)
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
 	df = df[categoricalCols]
-	df = removeNaN(df, categoricalCols)
+	df = removeNaN(df, categoricalCols, CONSTANT_FILLER)
 	logging.info(str(df.columns))
 	one_hot_encoder.fit(df)
 	return one_hot_encoder
