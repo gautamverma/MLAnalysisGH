@@ -29,7 +29,7 @@ def exploreFile(filename):
 	logging.info("Shape "+str(df.shape))
 
 	logging.info(str(df.weblab.value_counts()))
-	logging.info("weblab missing data count : " str(df.where(df['weblab']=='missing').dropna().shape))
+	logging.info("weblab missing data count : "+ str(df.where(df['weblab']=='missing').dropna().shape))
 
 	filter10less = df['impressions']<10
 	filter10more = df['impressions']>10
@@ -46,11 +46,11 @@ def exploreFile(filename):
 	filter100000less = df['impressions']<100000
 	filter100000more = df['impressions']>100000
 
-	logging.info("count < 10 impression : " str(df.where(filter10less).dropna().shape))
-	logging.info("10 < count < 100 impression  : " str(df.where(filter10more & filter100less).dropna().shape))
-	logging.info("100 < count < 1000 impression : " str(df.where(filter100more & filter1000less).dropna().shape))
-	logging.info("1000 < count < 10000 impression : " str(df.where(filter1000more & filter10000less).dropna().shape))
-	logging.info("10000 < count < 100000 impression : " str(df.where(filter100000more & filter100000less).dropna().shape))
+	logging.info("count < 10 impression : "+ str(df.where(filter10less).dropna().shape))
+	logging.info("10 < count < 100 impression  : "+ str(df.where(filter10more & filter100less).dropna().shape))
+	logging.info("100 < count < 1000 impression : "+ str(df.where(filter100more & filter1000less).dropna().shape))
+	logging.info("1000 < count < 10000 impression : "+ str(df.where(filter1000more & filter10000less).dropna().shape))
+	logging.info("10000 < count < 100000 impression : "+ str(df.where(filter100000more & filter100000less).dropna().shape))
 
 def __main__():
 	# count the arguments
