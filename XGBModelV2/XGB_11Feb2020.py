@@ -31,13 +31,18 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 
 # Batch size of 10000
 CHUNKSIZE = 100000
+# Default value ACTUAL SIZE 75%
 TRAIN_ITERATION = 30
 
 CONSTANT_FILLER = 'missing'
 NUMERIC_FILLER = 0
 
 ALL_CONSUMER    = 'allCustomer'
+# Default Impressions filter
 IMPRESSION_COUNT = 10
+
+# init using 0 but don't use if it's zero
+TOTAL_CHUNK_COUNT = 0 
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:
@@ -123,6 +128,10 @@ def removeNaN(df, categoricalCols, defValue):
 def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder = OneHotEncoder(sparse=False)
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
+
+	TOTAL_CHUNK_COUNT = df.shape[0]/CHUNKSIZE 
+	TRAIN_ITERATION = int((75*TOTAL_CHUNK_COUNT)/100)
+
 	df = df[categoricalCols]
 	df = removeNaN(df, categoricalCols, CONSTANT_FILLER)
 	logging.info(str(df.columns))
@@ -165,6 +174,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 		# Train on a part of dataset and predict on other
 		if(chunkcount>TRAIN_ITERATION):
 			break
+
 		logging.info('Starting Training - '+str(chunkcount))
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
 
@@ -208,9 +218,9 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
 
-	model_filename =  '/data/models/XGB_MODEL_{}_{}_{}.sav'
+	model_filename =  '/data/models/XGB_MODEL_impression-{}_learning-{}_max_depth-{}_timestamp{}.sav'
 	timestamp_value = int(datetime.datetime.now().timestamp())
-	model_filename  = model_filename.format(learning_rate_val, max_depth_val, timestamp_value) 
+	model_filename  = model_filename.format(IMPRESSION_COUNT, learning_rate_val, max_depth_val, timestamp_value) 
 	pickle.dump(xg_reg, open(model_filename, 'wb'))
 	
 	column_filename =  '/data/models/XGB_MODEL_COLUMN_{}.sav'
@@ -262,10 +272,10 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 
 		# Result Analysis for Chunk
 		matrix = confusion_matrix(OUTPUT, np.around(predictions))
-		print('Confusion Matrix :', str(matrix)) 
-		print('Accuracy Score :',accuracy_score(OUTPUT, np.around(predictions))) 
-		print('Report : ')
-		print(classification_report(OUTPUT, np.around(predictions))) 
+		logging.info('Confusion Matrix : ' + str(matrix)) 
+		logging.info('Accuracy Score : ' + str(accuracy_score(OUTPUT, np.around(predictions))))
+		logging.info('Report : ')
+		logging.info(str(classification_report(OUTPUT, np.around(predictions))))
 
 	return
 
@@ -285,8 +295,9 @@ def startSteps(learning_rate, max_depth):
 
 def __main__():
 	# count the arguments
-	if len(sys.argv) < 3:
-		raise RuntimeError("Please provide the learning_rate and max_depth")
+	if len(sys.argv) < 4:
+		raise RuntimeError("Please provide the learning_rate, max_depth and impressions count filter")
+	IMPRESSION_COUNT = int(sys.argv[3])
 	startSteps(sys.argv[1], sys.argv[2])
 
 #This is required to call the main function
