@@ -37,16 +37,15 @@ def exploreFile(filename):
 	logging.info("Shape "+str(df.shape))
 	logging.info(str(df.weblab.value_counts()))
 
-	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
 	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
 						'component_display_name', 'customer_targeting', 'site']
 
-	columns_to_keep = YColumns + numericalCols + categoricalCols
+	columns_to_keep =  numericalCols + categoricalCols
 	df = df[columns_to_keep + ['weblab']]
 
 	# Fill all Missing Values so dropna doesn't remove any row
-	df = removeNaN(df, YColumns + numericalCols, NUMERIC_FILLER)
+	df = removeNaN(df, numericalCols, NUMERIC_FILLER)
 	df = removeNaN(df, categoricalCols, CONSTANT_FILLER)
 
 	logging.info("weblab missing data count : "+ str(df.where(df['weblab']=='missing').dropna().shape))
