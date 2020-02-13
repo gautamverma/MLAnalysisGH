@@ -115,10 +115,10 @@ def label_result(row):
 		return 1
 	return 0
 
-def removeNaN(df, categoricalCols):
+def removeNaN(df, categoricalCols, defValue):
 	# Replace any NaN values
 	for col in categoricalCols:
-		df[[col]] = df[[col]].fillna(value=CONSTANT_FILLER)
+		df[[col]] = df[[col]].fillna(value=defValue)
 	return df
 
 # Build the One hot encoder using all data
