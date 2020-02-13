@@ -30,7 +30,7 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 # We will do this in later in this we are training a simple XGB Model for the seven days data
 
 # Batch size of 10000
-CHUNKSIZE = 1000000
+CHUNKSIZE = 100000
 TRAIN_ITERATION = 30
 
 CONSTANT_FILLER = 'missing'
@@ -65,7 +65,6 @@ def loadAndMerge(files):
 	df_merged_set = pd.merge(df_merged_set, df5, on='creative_id', how='inner')
 	logging.info('File merged');
 	return df_merged_set
-
 
 def label_column(df, column):
 	# TODO Make it general
@@ -108,7 +107,6 @@ def generateCleanFile(files, training_file_name):
 	logging.info("Dataframe Shape "+str(df_merged_set.shape))
 	df_merged_set.to_csv(training_file_name, index=False, encoding='utf-8')
 	logging.info('File Created')
-
 
 def label_result(row):
 	if(row['impressions']>IMPRESSION_COUNT):
