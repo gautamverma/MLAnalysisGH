@@ -136,9 +136,8 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder.fit(df)
 	return one_hot_encoder
 
-def trainModel(learning_rate, max_depth, training_file_name, model_filename):
+def trainModel(learning_rate, max_depth, training_file_name, model_filename, impression_count):
 
-	logging.info("Training for placements impressions < "+str(IMPRESSION_COUNT))
 	learning_params = {
 	    'objective' : 'binary:logistic',
 	    'colsample_bytree' : 0.3,
@@ -161,6 +160,8 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
 	logging.info('One hot encoder')
 
+	IMPRESSION_COUNT = int(impression_count)
+	logging.info("Training for placements impressions < "+str(IMPRESSION_COUNT))
 	#Model present then load and predict
 	if path.exists(model_filename):
 		logging.info("Model file present. Skipping to predication::")
@@ -278,7 +279,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 
 	return
 
-def startSteps(learning_rate, max_depth):
+def startSteps(learning_rate, max_depth, impression_count):
 	files =	[ 
 			'/data/s3_file/FE/18January03FebPMetrics000',
 			'/data/s3_file/FE/18January03FebPMetadata000',
@@ -290,15 +291,14 @@ def startSteps(learning_rate, max_depth):
 	model_filename = ''
 
 	generateCleanFile(files, training_file_name)
-	trainModel(learning_rate, max_depth, training_file_name, model_filename)
+	trainModel(learning_rate, max_depth, training_file_name, model_filename, impression_count)
 
 def __main__():
 	# count the arguments
 	if len(sys.argv) < 4:
 		raise RuntimeError("Please provide the learning_rate, max_depth and impressions count filter")
-	logging.info(str(sys.argv))
-	IMPRESSION_COUNT = int(sys.argv[3])
-	startSteps(sys.argv[1], sys.argv[2])
+	logging.info(sys.argv)
+	startSteps(sys.argv[1], sys.argv[2], sys.argv[3])
 
 #This is required to call the main function
 if __name__ == "__main__":
