@@ -44,6 +44,10 @@ def exploreFile(filename):
 	columns_to_keep =  numericalCols + categoricalCols
 	df = df[columns_to_keep + ['weblab']]
 
+	logging.info(str(df.dtypes)	
+	logging.info(str(df.container_id_label.value_counts()))	
+	logging.info(str(df.guarantee_percentage.value_counts()))
+
 	# Fill all Missing Values so dropna doesn't remove any row
 	df = removeNaN(df, numericalCols, NUMERIC_FILLER)
 	df = removeNaN(df, categoricalCols, CONSTANT_FILLER)
