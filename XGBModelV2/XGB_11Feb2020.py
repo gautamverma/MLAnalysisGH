@@ -275,8 +275,8 @@ def startSteps(learning_rate, max_depth):
 			'/data/s3_file/FE/18January03FebPP000',
 			'/data/s3_file/FE/18January03FebCreative000'
 			]
-	training_file_name = ''	
-	model_filename = '/data/models/XGB_MODEL_0.3_32_1581526059.sav'
+	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile'	
+	model_filename = ''
 
 	generateCleanFile(files, training_file_name)
 	trainModel(learning_rate, max_depth, training_file_name, model_filename)
