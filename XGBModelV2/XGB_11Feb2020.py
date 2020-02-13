@@ -93,7 +93,7 @@ def generateCleanFile(files, training_file_name):
 	# Clean few Columns 
 	# Targetting Columns
 	df_merged_set[['customer_targeting']] = df_merged_set[['customer_targeting']].fillna(value=ALL_CONSUMER)
-	df_merged_set[['guarantee_percentage']] = df_merged_set[['guarantee_percentage']].fillna(value=CONSTANT_FILLER)
+	df_merged_set[['guarantee_percentage']] = df_merged_set[['guarantee_percentage']].fillna(value=NUMERIC_FILLER)
 	df_merged_set[['component_display_name']] = df_merged_set[['component_display_name']].fillna(value=CONSTANT_FILLER)
 	logging.info('Targetting Columns Cleaned');
 	# Creative Columns
@@ -181,6 +181,9 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 		logging.info('Weblab Removed: Shape - '+str(df_merged_set_test.shape))
 
 		INPUT = df_merged_set_test[numericalCols]
+		# guarantee_percentage nan replaced by missing so change back
+		INPUT.replace(CONSTANT_FILLER, NUMERIC_FILLER)
+
 		ONEHOT = df_merged_set_test[categoricalCols]
 		OUTPUT = df_merged_set_test[YColumns]
 
@@ -248,6 +251,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 		df_merged_set_test = df_merged_set_test[columns_to_keep]	
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 		
+		INPUT.iloc[:,1].replace(CONSTANT_FILLER, NUMERIC_FILLER)
 		logging.info(str(INPUT.columns))
 
 		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
