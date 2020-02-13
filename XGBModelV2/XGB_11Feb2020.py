@@ -41,9 +41,6 @@ ALL_CONSUMER    = 'allCustomer'
 # Default Impressions filter
 IMPRESSION_COUNT = 10
 
-# init using 0 but don't use if it's zero
-TOTAL_CHUNK_COUNT = 0 
-
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:
 		raise RuntimeError("Column can't be null. Please give the column value")
@@ -132,6 +129,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	TOTAL_CHUNK_COUNT = df.shape[0]/CHUNKSIZE 
 	TRAIN_ITERATION = int((75*TOTAL_CHUNK_COUNT)/100)
 
+	logging.info("ChunkSize: Iterations ::" +str(TOTAL_CHUNK_COUNT)+str(TRAIN_ITERATION))
 	df = df[categoricalCols]
 	df = removeNaN(df, categoricalCols, CONSTANT_FILLER)
 	logging.info(str(df.columns))
@@ -218,12 +216,12 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename):
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
 
-	model_filename =  '/data/models/XGB_MODEL_impression-{}_learning-{}_max_depth-{}_timestamp{}.sav'
+	model_filename =  '/data/s3_file/models/XGB_MODEL_impression-{}_learning-{}_max_depth-{}_timestamp{}.sav'
 	timestamp_value = int(datetime.datetime.now().timestamp())
 	model_filename  = model_filename.format(IMPRESSION_COUNT, learning_rate_val, max_depth_val, timestamp_value) 
 	pickle.dump(xg_reg, open(model_filename, 'wb'))
 	
-	column_filename =  '/data/models/XGB_MODEL_COLUMN_{}.sav'
+	column_filename =  '/data/s3_file/models/XGB_MODEL_COLUMN_{}.sav'
 	column_filename = column_filename.format(timestamp_value)
 	pickle.dump(columns_to_keep, open(column_filename, 'wb'))
 	logging.info("Model and columns are saved")
