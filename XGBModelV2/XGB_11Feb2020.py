@@ -234,6 +234,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 
 		# Get all rows where weblab is missing
 		df_merged_without_weblab = chunk.where(chunk['weblab']=="missing").dropna()
+		logging.info("Count to predict " + str(df_merged_without_weblab.shape))
 		df_merged_set_test = df_merged_without_weblab[columns_to_keep]
 		
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]

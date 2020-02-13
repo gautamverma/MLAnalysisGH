@@ -1,0 +1,63 @@
+import sys
+import pickle
+import logging
+import datetime
+
+from os import path
+import pandas as pd
+import numpy as np
+import xgboost as xgb
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from sklearn.svm import SVC
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score 
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report 
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+
+# Log time-level and message for getting a running estimate
+logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+
+
+def exploreFile(filename):
+	df = pd.read_csv(training_file_name, skiprows=0, header=0)
+
+	logging.info("Shape "+str(df.shape))
+
+	logging.info(str(df.weblab.value_counts()))
+	logging.info("weblab missing data count : " str(df.where(df['weblab']=='missing').dropna().shape))
+
+	filter10less = df['impressions']<10
+	filter10more = df['impressions']>10
+
+	filter100less = df['impressions']<100
+	filter100more = df['impressions']>100
+
+	filter1000less = df['impressions']<1000
+	filter1000more = df['impressions']>1000
+
+	filter10000less = df['impressions']<10000
+	filter10000more = df['impressions']>10000
+
+	filter100000less = df['impressions']<100000
+	filter100000more = df['impressions']>100000
+
+	logging.info("count < 10 impression : " str(df.where(filter10less).dropna().shape))
+	logging.info("10 < count < 100 impression  : " str(df.where(filter10more & filter100less).dropna().shape))
+	logging.info("100 < count < 1000 impression : " str(df.where(filter100more & filter1000less).dropna().shape))
+	logging.info("1000 < count < 10000 impression : " str(df.where(filter1000more & filter10000less).dropna().shape))
+	logging.info("10000 < count < 100000 impression : " str(df.where(filter100000more & filter100000less).dropna().shape))
+
+def __main__():
+	# count the arguments
+	if len(sys.argv) < 2:
+		raise RuntimeError("Please provide the filename")
+	startSteps(sys.argv[1])
+
+#This is required to call the main function
+if __name__ == "__main__":
+	__main__()
