@@ -44,7 +44,7 @@ def exploreFile(filename):
 	columns_to_keep =  numericalCols + categoricalCols
 	df = df[columns_to_keep + ['weblab']]
 
-	logging.info(str(df.dtypes)	
+	logging.info(str(df.dtypes))	
 	logging.info(str(df.container_id_label.value_counts()))	
 	logging.info(str(df.guarantee_percentage.value_counts()))
 
