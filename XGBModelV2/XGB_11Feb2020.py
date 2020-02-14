@@ -168,7 +168,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 	if path.exists(model_filename):
 		logging.info("Model file present. Skipping to predication::")
 		xg_reg = pickle.load(open(model_filename, 'rb'))
-		predict(training_file_name, one_hot_encoder, xg_reg)
+		predict(training_file_name, one_hot_encoder, xg_reg, IMPRESSION_COUNT)
 		return
 
 	chunkcount = 1
