@@ -161,6 +161,8 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
 	logging.info('One hot encoder')
 
+	# Convert it as it used for comparison 
+	impression_count = int(impression_count)
 	#Model present then load and predict
 	if model_filename is not None and path.exists(model_filename):
 		logging.info("Model file present. Skipping to predication::")
@@ -169,7 +171,6 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 		return
 
 	chunkcount = 1
-	impression_count = int(impression_count)
 	logging.info("Training for placements impressions < "+str(impression_count))
 	logging.info("Training for total chunks : "+str(TRAIN_ITERATION))
 	for chunk in pd.read_csv(training_file_name, chunksize=CHUNKSIZE):
