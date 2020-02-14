@@ -299,7 +299,7 @@ def __main__():
 		raise RuntimeError("Please provide the learning_rate, max_depth and impressions count filter")
 	logging.info(sys.argv)
 	model_filename = None
-	if(sys.argv>4):
+	if(len(sys.argv)>4):
 		model_filename = sys.argv[4]
 
 	startSteps(sys.argv[1], sys.argv[2], sys.argv[3], model_filename)
