@@ -38,8 +38,6 @@ CONSTANT_FILLER = 'missing'
 NUMERIC_FILLER = 0
 
 ALL_CONSUMER    = 'allCustomer'
-# Default Impressions filter
-IMPRESSION_COUNT = 10
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
 	if column is None:
@@ -123,6 +121,9 @@ def removeNaN(df, categoricalCols, defValue):
 
 # Build the One hot encoder using all data
 def buildOneHotEncoder(training_file_name, categoricalCols):
+	# using a global keyword 
+    global TRAIN_ITERATION
+
 	one_hot_encoder = OneHotEncoder(sparse=False)
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
 
@@ -136,7 +137,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder.fit(df)
 	return one_hot_encoder
 
-def trainModel(learning_rate, max_depth, training_file_name, model_filename, impression_count):
+def trainModel(learning_rate, max_depth, training_file_name, model_filename, impression_count=10):
 
 	learning_params = {
 	    'objective' : 'binary:logistic',
@@ -214,7 +215,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 		logging.info("Model saved "+str(xg_reg))
 
 	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep)
-	predict(training_file_name, one_hot_encoder, xg_reg)
+	predict(training_file_name, one_hot_encoder, xg_reg, IMPRESSION_COUNT)
 	return
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
@@ -229,7 +230,7 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
 	pickle.dump(columns_to_keep, open(column_filename, 'wb'))
 	logging.info("Model and columns are saved")
 
-def predict(training_file_name, one_hot_encoder, xg_reg):
+def predict(training_file_name, one_hot_encoder, xg_reg, IMPRESSION_COUNT):
 
 	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
