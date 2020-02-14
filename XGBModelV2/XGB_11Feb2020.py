@@ -122,7 +122,7 @@ def removeNaN(df, categoricalCols, defValue):
 # Build the One hot encoder using all data
 def buildOneHotEncoder(training_file_name, categoricalCols):
 	# using a global keyword 
-    global TRAIN_ITERATION
+	global TRAIN_ITERATION
 
 	one_hot_encoder = OneHotEncoder(sparse=False)
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
