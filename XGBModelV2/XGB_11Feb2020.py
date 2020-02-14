@@ -177,7 +177,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 			break
 
 		logging.info('Starting Training - '+str(chunkcount))
-		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
+		chunk['result'] = chunk.apply (lambda row: label_result(row, impression_count), axis=1)
 
 		# Get only the columns to evaluate
 		chunk = chunk[columns_to_keep + ['weblab']]
