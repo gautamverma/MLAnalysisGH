@@ -169,6 +169,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 		return
 
 	chunkcount = 1
+	impression_count = int(impression_count)
 	logging.info("Training for placements impressions < "+str(impression_count))
 	logging.info("Training for total chunks : "+str(TRAIN_ITERATION))
 	for chunk in pd.read_csv(training_file_name, chunksize=CHUNKSIZE):
