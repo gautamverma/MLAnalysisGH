@@ -129,7 +129,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	TOTAL_CHUNK_COUNT = df.shape[0]/CHUNKSIZE 
 	TRAIN_ITERATION = int((75*TOTAL_CHUNK_COUNT)/100)
 
-	logging.info("ChunkSize: Iterations ::" +str(TOTAL_CHUNK_COUNT)+str(TRAIN_ITERATION))
+	logging.info("ChunkSize: Iterations ::" +str(TOTAL_CHUNK_COUNT)+ " : " +str(TRAIN_ITERATION))
 	df = df[categoricalCols]
 	df = removeNaN(df, categoricalCols, CONSTANT_FILLER)
 	logging.info(str(df.columns))
@@ -162,6 +162,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 
 	IMPRESSION_COUNT = int(impression_count)
 	logging.info("Training for placements impressions < "+str(IMPRESSION_COUNT))
+	logging.info("Training for total chunks : "+str(TRAIN_ITERATION))
 	#Model present then load and predict
 	if path.exists(model_filename):
 		logging.info("Model file present. Skipping to predication::")
@@ -256,7 +257,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 		# Get all rows where weblab is missing
 		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
 		df_merged_set_test = df_merged_set_test[columns_to_keep]
-		logging.info("Count to predict " + str(df_merged_without_weblab.shape))
+		logging.info("Count to predict " + str(df_merged_set_test.shape))
 		
 		df_merged_set_test = df_merged_set_test[columns_to_keep]	
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
@@ -279,7 +280,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg):
 
 	return
 
-def startSteps(learning_rate, max_depth, impression_count):
+def startSteps(learning_rate, max_depth, impression_count, model_filename):
 	files =	[ 
 			'/data/s3_file/FE/18January03FebPMetrics000',
 			'/data/s3_file/FE/18January03FebPMetadata000',
@@ -287,8 +288,7 @@ def startSteps(learning_rate, max_depth, impression_count):
 			'/data/s3_file/FE/18January03FebPP000',
 			'/data/s3_file/FE/18January03FebCreative000'
 			]
-	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile'	
-	model_filename = ''
+	training_file_name = '/data/s3_file/FE/18January03FebTrainingFile'
 
 	generateCleanFile(files, training_file_name)
 	trainModel(learning_rate, max_depth, training_file_name, model_filename, impression_count)
@@ -298,7 +298,11 @@ def __main__():
 	if len(sys.argv) < 4:
 		raise RuntimeError("Please provide the learning_rate, max_depth and impressions count filter")
 	logging.info(sys.argv)
-	startSteps(sys.argv[1], sys.argv[2], sys.argv[3])
+	model_filename = None
+	if(sys.argv>4):
+		model_filename = sys.argv[4]
+
+	startSteps(sys.argv[1], sys.argv[2], sys.argv[3], model_filename)
 
 #This is required to call the main function
 if __name__ == "__main__":
