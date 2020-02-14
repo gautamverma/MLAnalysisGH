@@ -108,8 +108,8 @@ def generateCleanFile(files, training_file_name):
 	df_merged_set.to_csv(training_file_name, index=False, encoding='utf-8')
 	logging.info('File Created')
 
-def label_result(row):
-	if(row['impressions']>IMPRESSION_COUNT):
+def label_result(row, impression_count):
+	if(row['impressions']>impression_count):
 		return 1
 	return 0
 
@@ -161,17 +161,16 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
 	logging.info('One hot encoder')
 
-	IMPRESSION_COUNT = int(impression_count)
-	logging.info("Training for placements impressions < "+str(IMPRESSION_COUNT))
-	logging.info("Training for total chunks : "+str(TRAIN_ITERATION))
 	#Model present then load and predict
 	if model_filename is not None and path.exists(model_filename):
 		logging.info("Model file present. Skipping to predication::")
 		xg_reg = pickle.load(open(model_filename, 'rb'))
-		predict(training_file_name, one_hot_encoder, xg_reg, IMPRESSION_COUNT)
+		predict(training_file_name, one_hot_encoder, xg_reg, impression_count)
 		return
 
 	chunkcount = 1
+	logging.info("Training for placements impressions < "+str(impression_count))
+	logging.info("Training for total chunks : "+str(TRAIN_ITERATION))
 	for chunk in pd.read_csv(training_file_name, chunksize=CHUNKSIZE):
 		# Train on a part of dataset and predict on other
 		if(chunkcount>TRAIN_ITERATION):
@@ -215,7 +214,7 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 		logging.info("Model saved "+str(xg_reg))
 
 	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep)
-	predict(training_file_name, one_hot_encoder, xg_reg, IMPRESSION_COUNT)
+	predict(training_file_name, one_hot_encoder, xg_reg, impression_count)
 	return
 
 def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
@@ -230,7 +229,7 @@ def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
 	pickle.dump(columns_to_keep, open(column_filename, 'wb'))
 	logging.info("Model and columns are saved")
 
-def predict(training_file_name, one_hot_encoder, xg_reg, IMPRESSION_COUNT):
+def predict(training_file_name, one_hot_encoder, xg_reg, impression_count):
 
 	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
@@ -246,7 +245,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg, IMPRESSION_COUNT):
 			chunkcount = chunkcount + 1
 			continue
 
-		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
+		chunk['result'] = chunk.apply (lambda row: label_result(row, impression_count), axis=1)
 		
 		# Get only the columns to evaluate
 		chunk = chunk[columns_to_keep + ['weblab']]
