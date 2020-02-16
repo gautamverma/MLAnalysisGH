@@ -215,15 +215,15 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 		chunkcount = chunkcount + 1
 		logging.info("Model saved "+str(xg_reg))
 
-	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep)
+	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep, impression_count)
 	predict(training_file_name, one_hot_encoder, xg_reg, impression_count)
 	return
 
-def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep):
+def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep, impression_count):
 
 	model_filename =  '/data/s3_file/models/XGB_MODEL_impression-{}_learning-{}_max_depth-{}_timestamp{}.sav'
 	timestamp_value = int(datetime.datetime.now().timestamp())
-	model_filename  = model_filename.format(IMPRESSION_COUNT, learning_rate_val, max_depth_val, timestamp_value) 
+	model_filename  = model_filename.format(impression_count, learning_rate_val, max_depth_val, timestamp_value) 
 	pickle.dump(xg_reg, open(model_filename, 'wb'))
 	
 	column_filename =  '/data/s3_file/models/XGB_MODEL_COLUMN_{}.sav'
