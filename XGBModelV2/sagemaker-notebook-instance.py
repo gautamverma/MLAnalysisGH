@@ -9,7 +9,6 @@ import datetime
 from os import path
 import pandas as pd
 import numpy as np
-import seaborn as sns
 
 import sagemaker.xgboost as xgb
 
