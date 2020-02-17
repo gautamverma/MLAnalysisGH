@@ -23,6 +23,9 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 from sagemaker.tuner import IntegerParameter, CategoricalParameter, ContinuousParameter, HyperparameterTuner 
  
+# Log time-level and message for getting a running estimate
+logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+
  # Batch size of 200000
 CHUNKSIZE = 200000
 CONSTANT_FILLER = 'missing'
@@ -43,7 +46,7 @@ training_filename='training_file'
 
 s3 = boto3.resource('s3')
 if(path.exists(training_filename)):
-    print('file present')
+    logging.info('file present')
 else:
     s3.Bucket(input_bucket).download_file(prefix, training_filename)
 
@@ -77,10 +80,10 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	TOTAL_CHUNK_COUNT = df.shape[0]/CHUNKSIZE 
 	TRAIN_ITERATION = int((75*TOTAL_CHUNK_COUNT)/100)
 
-	print("ChunkSize: Iterations ::" +str(TOTAL_CHUNK_COUNT)+ " : " +str(TRAIN_ITERATION))
+	logging.info("ChunkSize: Iterations ::" +str(TOTAL_CHUNK_COUNT)+ " : " +str(TRAIN_ITERATION))
 	df = df[categoricalCols]
 	df = removeNaN(df, categoricalCols, CONSTANT_FILLER)
-	print(str(df.columns))
+	logging.info(str(df.columns))
 	one_hot_encoder.fit(df)
 	return one_hot_encoder
 
@@ -98,7 +101,8 @@ def buildCleanFile():
 	s3_training_file = 'training_file18Jan3FebFE-' + strftime("%Y-%m-%d-%H-%M-%S", gmtime())
 	
 	chunkcount = 1
-	LARGECHUNK = 1000000
+	LARGECHUNK = 100000
+	logging.info("Starting the file preparation")
 	for chunk in pd.read_csv(training_filename, chunksize=LARGECHUNK):
 
 		# Add the result column
@@ -179,17 +183,17 @@ def trainModel():
 	startOneHotIndex = len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
-	print('One hot encoder')
+	logging.info('One hot encoder')
 
 	chunkcount = 1
-	print("Training for placements impressions < "+str(impression_count))
-	print("Training for total chunks : "+str(TRAIN_ITERATION))
+	logging.info("Training for placements impressions < "+str(impression_count))
+	logging.info("Training for total chunks : "+str(TRAIN_ITERATION))
 	for chunk in pd.read_csv(training_file_name, chunksize=CHUNKSIZE):
 		# Train on a part of dataset and predict on other
 		if(chunkcount>TRAIN_ITERATION):
 			break
 
-		print('Starting Training - '+str(chunkcount))
+		logging.info('Starting Training - '+str(chunkcount))
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
 
 		# Get only the columns to evaluate
@@ -202,7 +206,7 @@ def trainModel():
 		# Get all rows where weblab is missing
 		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
 		df_merged_set_test = df_merged_set_test[columns_to_keep]
-		print('Weblab Removed: Shape - '+str(df_merged_set_test.shape))
+		logging.info('Weblab Removed: Shape - '+str(df_merged_set_test.shape))
 
 		INPUT = df_merged_set_test[numericalCols]
 		# guarantee_percentage nan replaced by missing so change back
@@ -211,11 +215,11 @@ def trainModel():
 		ONEHOT = df_merged_set_test[categoricalCols]
 		OUTPUT = df_merged_set_test[YColumns]
 
-		print(str(INPUT.columns))
-		print(str(ONEHOT.columns))
+		logging.info(str(INPUT.columns))
+		logging.info(str(ONEHOT.columns))
 
 		one_hot_encoded = one_hot_encoder.transform(ONEHOT)
-		print('One hot encoding done')
+		logging.info('One hot encoding done')
 		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:], one_hot_encoded)), label=OUTPUT)
 
 		if(chunkcount==1):
@@ -224,7 +228,7 @@ def trainModel():
 			# Takes in the intially model and produces a better one
 			xg_reg = xgb.train(learning_params, dataMatrix, 200, xgb_model=xg_reg)
 		chunkcount = chunkcount + 1
-		print("Model saved "+str(xg_reg))
+		logging.info("Model saved "+str(xg_reg))
 
 	saveModel(xg_reg, learning_params, columns_to_keep)
 	return
