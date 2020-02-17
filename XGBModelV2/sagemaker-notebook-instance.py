@@ -1,6 +1,7 @@
 import sagemaker
 
 import os
+import sys
 import boto3
 import pickle
 import datetime
@@ -11,6 +12,8 @@ import numpy as np
 import seaborn as sns
 
 import sagemaker.xgboost as xgb
+
+from time import gmtime, strftime
 
 from sklearn.metrics import accuracy_score 
 from sklearn.metrics import confusion_matrix
@@ -83,7 +86,6 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	return one_hot_encoder
 
 def buildCleanFile():
-
 	YColumns = ['result']
 	numericalCols = ['guarantee_percentage', 'container_id_label']
 	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
@@ -91,9 +93,13 @@ def buildCleanFile():
 
 	startOneHotIndex = len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
-	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
+	one_hot_encoder = buildOneHotEncoder(training_filename, categoricalCols)
 
-	LARGECHUNK = 3000000
+	s3_test_file = 'test_file18Jan3FebFE-' + strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+	s3_training_file = 'training_file18Jan3FebFE-' + strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+	
+	chunkcount = 1
+	LARGECHUNK = 1000000
 	for chunk in pd.read_csv(training_filename, chunksize=LARGECHUNK):
 
 		# Add the result column
@@ -105,22 +111,37 @@ def buildCleanFile():
 		# Fill All Categorical Missing Values
 		chunk = removeNaN(chunk, YColumns + numericalCols, NUMERIC_FILLER)
 		chunk = removeNaN(chunk, categoricalCols, CONSTANT_FILLER)
-
+		
 		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
 		df_merged_set_test = df_merged_set_test[columns_to_keep]
-
-		INPUT = df_merged_set_test[numericalCols]
+		
 		# guarantee_percentage nan replaced by missing so change back
-		INPUT.replace(CONSTANT_FILLER, NUMERIC_FILLER, inplace=True)
+		df_merged_set_test[YColumns + numericalCols].replace(CONSTANT_FILLER, NUMERIC_FILLER, inplace=True)
 
-		ONEHOT = df_merged_set_test[categoricalCols]
-		OUTPUT = df_merged_set_test[YColumns]
+		Y, X = df_merged_set_test.iloc[:,0], df_merged_set_test.iloc[:,1:] 
+		X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=123)
 
-		one_hot_encoded = one_hot_encoder.transform(ONEHOT)
+		one_hot_encoded_train = one_hot_encoder.transform(X_train.iloc[:,2:])
+		TRAIN_CHUNK = np.column_stack((y_train, X_train.iloc[:,0:2], one_hot_encoded_train))
 
+		one_hot_encoded_test = one_hot_encoder.transform(X_test.iloc[:,2:])
+		TEST_CHUNK  = np.column_stack((y_test, X_test.iloc[:,0:2], one_hot_encoded_test))
 
+		TRAIN_DF = pd.DataFrame(TRAIN_CHUNK)
+		if(chunkcount>1):
+			TRAIN_DF.to_csv(s3_training_file, header=False, index=False, mode='a')
+		else:
+			TRAIN_DF.to_csv(s3_training_file, header=False, index=False)
 
+		TEST_DF = pd.DataFrame(TEST_CHUNK)
+		if(chunkcount>1):
+			TEST_DF.to_csv(s3_test_file, header=False, index=False, mode='a')
+		else:
+			TEST_DF.to_csv(s3_test_file, header=False, index=False)
+		chunkcount = chunkcount + 1
 
+	s3.Bucket(input_bucket).upload_file(s3_training_file, 'inputs/'+s3)
+	s3.Bucket(input_bucket).upload_file(s3_test_file, 'inputs/'+s3)
 
 def saveModel(xg_reg, learning_params, columns_to_keep):
 	# Dump the model in the Notebook Instance and upload it to S3
@@ -208,3 +229,19 @@ def trainModel():
 
 	saveModel(xg_reg, learning_params, columns_to_keep)
 	return
+
+def __main__():
+	# count the arguments
+	if(len(sys.argv) < 2):
+		raise RuntimeError("Please provide the which method to run")
+	if(sys.argv[1] == 'buildCleanFile'):
+		return buildCleanFile()
+	elif(sys.argv[1]== 'trainModel'):
+		return trainModel()
+	raise RuntimeError("No method exist by the name: " + sys.argv[1])
+
+#This is required to call the main function
+if __name__ == "__main__":
+	__main__()
+
+
