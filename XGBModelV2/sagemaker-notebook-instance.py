@@ -121,7 +121,8 @@ def buildCleanFile():
 		
 		# guarantee_percentage nan replaced by missing so change back
 		for col in numericalCols:
-			df_merged_set_test[col].replace({CONSTANT_FILLER: NUMERIC_FILLER}, inplace=True)
+			logging.info("Replacing for column " + col)
+			df_merged_set_test.replace({col: {CONSTANT_FILLER: NUMERIC_FILLER}}, inplace=True)
 
 		Y, X = df_merged_set_test.iloc[:,0], df_merged_set_test.iloc[:,1:] 
 		X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=123)
