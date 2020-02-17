@@ -4,6 +4,7 @@ import os
 import sys
 import boto3
 import pickle
+import logging
 import datetime
 
 from os import path
