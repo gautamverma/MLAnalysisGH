@@ -118,11 +118,9 @@ def buildCleanFile():
 		
 		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
 		df_merged_set_test = df_merged_set_test[columns_to_keep]
-		
-		# guarantee_percentage nan replaced by missing so change back
-		for col in numericalCols:
-			logging.info("Replacing for column " + col)
-			df_merged_set_test.replace({col: {CONSTANT_FILLER: NUMERIC_FILLER}}, inplace=True)
+
+		#  nan replaced by missing so change back
+		df_merged_set_test.replace({'guarantee_percentage': {CONSTANT_FILLER: NUMERIC_FILLER}}, inplace=True)
 
 		Y, X = df_merged_set_test.iloc[:,0], df_merged_set_test.iloc[:,1:] 
 		X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=123)
