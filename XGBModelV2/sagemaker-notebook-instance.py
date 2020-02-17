@@ -120,7 +120,8 @@ def buildCleanFile():
 		df_merged_set_test = df_merged_set_test[columns_to_keep]
 		
 		# guarantee_percentage nan replaced by missing so change back
-		df_merged_set_test[YColumns + numericalCols].replace(CONSTANT_FILLER, NUMERIC_FILLER, inplace=True)
+		for col in numericalCols:
+			df_merged_set_test[col].replace({CONSTANT_FILLER: NUMERIC_FILLER}, inplace=True)
 
 		Y, X = df_merged_set_test.iloc[:,0], df_merged_set_test.iloc[:,1:] 
 		X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=123)
