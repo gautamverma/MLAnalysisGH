@@ -110,16 +110,16 @@ def generateCleanFile(files, training_file_name):
 
 def label_result(row):
 	if(row['impressions']<10):
-		return 1
+		return 0
 	elif(row['impressions']<100):
-		return 2
+		return 1
 	elif(row['impressions']<1000):
-		return 3
+		return 2
 	elif(row['impressions']<10000):
-		return 4
+		return 3
 	elif(row['impressions']<100000):
-		return 5
-	return 6
+		return 4
+	return 5
 
 def removeNaN(df, categoricalCols, defValue):
 	# Replace any NaN values
