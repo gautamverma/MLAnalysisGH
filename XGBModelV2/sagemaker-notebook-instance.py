@@ -22,6 +22,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
+from sagemaker.amazon.amazon_estimator import get_image_uri
 from sagemaker.tuner import IntegerParameter, CategoricalParameter, ContinuousParameter, HyperparameterTuner 
  
 # Log time-level and message for getting a running estimate
@@ -147,7 +148,7 @@ def buildCleanFile():
 	s3.Bucket(input_bucket).upload_file(s3_training_file, 'inputs/'+s3)
 	s3.Bucket(input_bucket).upload_file(s3_test_file, 'inputs/'+s3)
 
-def saveModel(xg_reg, learning_params, columns_to_keep):
+def saveModel(xg_reg, columns_to_keep):
 	# Dump the model in the Notebook Instance and upload it to S3
 	model_filename =  'XGB_MODEL_impression-timestamp{}.sav'
 	timestamp_value = int(datetime.datetime.now().timestamp())
@@ -163,75 +164,38 @@ def saveModel(xg_reg, learning_params, columns_to_keep):
 
 def trainModel():
 
-	learning_params = {
-	    'objective' : 'multi:softmax',
+	sess = sagemaker.Session()
+	container = get_image_uri(region, 'xgboost')
+	
+	YColumns = ['result']
+	numericalCols = ['guarantee_percentage', 'container_id_label']
+	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
+						'component_display_name', 'customer_targeting', 'site']
+
+	columns_to_keep = YColumns + numericalCols + categoricalCols
+
+	output_path_str = 's3://{}/{}/sagemaker-' + strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+	xgb = sagemaker.estimator.Estimator(container, role, 
+                                    train_instance_count=1, 
+                                    train_instance_type='ml.m4.xlarge',
+                                    output_path=output_path_str.format(input_bucket, 'results'),
+                                    sagemaker_session=sess)
+
+	xgb.set_hyperparameters('objective' : 'multi:softmax',
 	    'colsample_bytree' : 0.3,
 	    'learning_rate' : 0.3, 
 	    'max_depth' : 16,
 	    'alpha' : 5,
 	    'num_class': 6,
-	    'n_estimators' : 200
-	}
+	    'n_estimators' : 200,
+	    'num_round': 200)
 
-	# Init a base Model
-	xg_reg = {}
-
-	YColumns = ['result']
-	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
-	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
-						'component_display_name', 'customer_targeting', 'site']
-
-	startOneHotIndex = len(numericalCols)
-	columns_to_keep = YColumns + numericalCols + categoricalCols
-	one_hot_encoder = buildOneHotEncoder(training_file_name, categoricalCols)
-	logging.info('One hot encoder')
-
-	chunkcount = 1
-	logging.info("Training for placements impressions < "+str(impression_count))
-	logging.info("Training for total chunks : "+str(TRAIN_ITERATION))
-	for chunk in pd.read_csv(training_file_name, chunksize=CHUNKSIZE):
-		# Train on a part of dataset and predict on other
-		if(chunkcount>TRAIN_ITERATION):
-			break
-
-		logging.info('Starting Training - '+str(chunkcount))
-		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
-
-		# Get only the columns to evaluate
-		chunk = chunk[columns_to_keep + ['weblab']]
-
-		# Fill All Categorical Missing Values
-		chunk = removeNaN(chunk, YColumns + numericalCols, NUMERIC_FILLER)
-		chunk = removeNaN(chunk, categoricalCols, CONSTANT_FILLER)
-
-		# Get all rows where weblab is missing
-		df_merged_set_test = chunk.where(chunk['weblab']=="missing").dropna()
-		df_merged_set_test = df_merged_set_test[columns_to_keep]
-		logging.info('Weblab Removed: Shape - '+str(df_merged_set_test.shape))
-
-		INPUT = df_merged_set_test[numericalCols]
-		# guarantee_percentage nan replaced by missing so change back
-		INPUT.replace(CONSTANT_FILLER, NUMERIC_FILLER, inplace=True)
-
-		ONEHOT = df_merged_set_test[categoricalCols]
-		OUTPUT = df_merged_set_test[YColumns]
-
-		logging.info(str(INPUT.columns))
-		logging.info(str(ONEHOT.columns))
-
-		one_hot_encoded = one_hot_encoder.transform(ONEHOT)
-		logging.info('One hot encoding done')
-		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:], one_hot_encoded)), label=OUTPUT)
-
-		if(chunkcount==1):
-			xg_reg = xgb.train(learning_params, dataMatrix, 200)
-		else:
-			# Takes in the intially model and produces a better one
-			xg_reg = xgb.train(learning_params, dataMatrix, 200, xgb_model=xg_reg)
-		chunkcount = chunkcount + 1
-		logging.info("Model saved "+str(xg_reg))
-
-	saveModel(xg_reg, learning_params, columns_to_keep)
+	input_prefix = 'inputs'
+	s3_input_train = sagemaker.s3_input(s3_data='s3://{}/{}/{}'.format(input_bucket, input_prefix, s3_training_file), content_type='csv')
+	s3_input_validation = sagemaker.s3_input(s3_data='s3://{}/{}/{}'.format(input_bucket, input_prefix, s3_training_file), content_type='csv')
+	
+	xgb.fit({'train': s3_input_train, 'validation': s3_input_validation})
+	saveModel(xgb, columns_to_keep)
 	return
 
 def __main__():
