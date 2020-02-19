@@ -55,7 +55,7 @@ def downloadFileFromS3(bucket, prefix, filepath):
 		logging.info(filepath + " already exists")
 		return filepath
 
-	s3.Bucket(input_bucket).download_file(prefix, filepath)
+	s3.Bucket(bucket).download_file(prefix, filepath)
 	return filepath
 
 def mergeDataframe(df1, df2, column, joinType='inner'):
