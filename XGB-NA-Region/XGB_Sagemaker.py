@@ -84,7 +84,7 @@ def loadAndMerge(data_input):
 
 	file2 = downloadFileFromS3(data_input[IBUCKET_KEY], data_input[IFILES_KEY][1],
 		 data_input[IFOLDER_KEY] + '/' + Path(data_input[IFILES_KEY][1]).stem)
-	df2 = pd.read_csv(file4, skiprows=0, header=0)
+	df2 = pd.read_csv(file2, skiprows=0, header=0)
 	logging.info(df2.columns)
 
 	file3 = downloadFileFromS3(data_input[IBUCKET_KEY], data_input[IFILES_KEY][2],
