@@ -1,4 +1,5 @@
 import sys
+import boto3
 import pickle
 import logging
 import datetime
@@ -48,6 +49,7 @@ ITRAINING_FP = 'training_file_name'
 
 # Prefix will also contain the filename which we build when calling it Path(prefix).stem
 def downloadFileFromS3(bucket, prefix, filepath):
+	s3 = boto3.resource('s3')
 	if(path.exists(filepath)):
 		logging.info(filepath + " already exists")
 		return filepath
@@ -61,6 +63,13 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 	return pd.merge(df1, df2, on=column, how=joinType);
 
 def loadAndMerge(data_input):
+
+	region = boto3.Session().region_name    
+	smclient = boto3.Session().client('sagemaker')
+
+	# Default role and bucket
+	role = sagemaker.get_execution_role()
+
 	# placement_metrics_file  {0}
 	# placement_metadata_file {1}
 	# content_metadata_file {2}
@@ -242,8 +251,6 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 		logging.info('Weblab Removed: Shape - '+str(df_merged_set_test.shape))
 
 		INPUT = df_merged_set_test[numericalCols]
-		# guarantee_percentage nan replaced by missing so change back
-		INPUT.replace(CONSTANT_FILLER, NUMERIC_FILLER, inplace=True)
 
 		ONEHOT = df_merged_set_test[categoricalCols]
 		OUTPUT = df_merged_set_test[YColumns]
@@ -312,7 +319,6 @@ def predict(training_file_name, one_hot_encoder, xg_reg, impression_count):
 		df_merged_set_test = df_merged_set_test[columns_to_keep]	
 		INPUT, OUTPUT = df_merged_set_test.iloc[:,1:], df_merged_set_test.iloc[:,0]
 		
-		INPUT.iloc[:,1].replace(CONSTANT_FILLER, NUMERIC_FILLER, inplace=True)
 		logging.info(str(INPUT.columns))
 
 		one_hot_encoded = one_hot_encoder.transform(INPUT.iloc[:,startOneHotIndex:])
