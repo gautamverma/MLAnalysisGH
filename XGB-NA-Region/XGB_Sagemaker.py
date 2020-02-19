@@ -3,6 +3,7 @@ import boto3
 import pickle
 import logging
 import datetime
+import sagemaker
 
 from os import path
 import pandas as pd
