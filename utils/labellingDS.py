@@ -10,6 +10,8 @@ import numpy as np
 # Log time-level and message for getting a running estimate
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+CONSTANT_FILLER='missing'
+
 def generateLabel(folder , columnNm):
 	# Check if the map file already generated
 	map_file = folder + columnNm + "_map.dict"
