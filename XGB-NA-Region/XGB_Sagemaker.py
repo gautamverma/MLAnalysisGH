@@ -118,7 +118,7 @@ def label_column(df, baseFolder, column):
 		logging.info("Filename is "+map_file)
 		unique_container_id_hash = pickle.load(open(map_file, 'rb'))
 		df['container_id_label'] = df.apply (lambda row: unique_container_id_hash[row[column]], axis=1)
-		return
+		return df;
 
 	# TODO Make it general
 	unique_container_id_list = df.container_id.unique().tolist()
