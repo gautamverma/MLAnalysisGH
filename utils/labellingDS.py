@@ -28,12 +28,37 @@ def generateLabel(folder , columnNm):
 	column_series = pd.Series(df[columnNm + '_label'].values, index=df[columnNm]) 
 	pickle.dump(column_series.to_dict(), open(map_file, 'wb'))
 
+def generateLabelfromDf(baseFolder, columnNm, filepath):
+
+	map_file = baseFolder + columnNm + "_map.dict"
+	if path.exists(map_file):
+		logging.info("Label unique hash file exists for col: "+ columnNm)
+		return
+
+	df = pd.read_csv(baseFolder + filepath, skiprows=0, header=0)
+
+	unique_column_list = df[columnNm].unique().tolist()
+	
+	unique_column_hash = {}
+	position = 1
+	for val in unique_column_list:
+		unique_column_hash[val] = position
+		position = position + 1
+
+	logging.info('Label done for '+ column)
+	pickle.dump(unique_column_hash, open(map_file, 'wb'))
+	return
+
+
 def __main__():
 	# count the arguments
 	if len(sys.argv) < 3:
-		raise RuntimeError("Please provode the base folder and column name")
+		raise RuntimeError("Please provode the method name , base folder and column name")
 	logging.info("Folder name :: column name " + sys.argv[1] +" :: " + sys.argv[2])	
-	generateLabel(sys.argv[1], sys.argv[2])
+	if(sys.argv[1]=='generateLabel'):
+		generateLabel(sys.argv[2], sys.argv[3])
+	else:
+		generateLabelfromDf(sys.argv[2], sys.argv[3], sys.argv[4])
 
 #This is required to call the main function
 if __name__ == "__main__":
