@@ -38,14 +38,16 @@ def generateLabelfromDf(baseFolder, columnNm, filepath):
 	df = pd.read_csv(baseFolder + filepath, skiprows=0, header=0)
 
 	unique_column_list = df[columnNm].unique().tolist()
-	
+	logging.info("unique list head "+str(unique_column_list[:5]))
+
 	unique_column_hash = {}
 	position = 1
 	for val in unique_column_list:
 		unique_column_hash[val] = position
 		position = position + 1
 
-	logging.info('Label done for '+ column)
+	logging.info('Label done for '+ columnNm)
+	logging.info(str(dict(islice(unique_column_hash.iteritems(), 0, 5))))
 	pickle.dump(unique_column_hash, open(map_file, 'wb'))
 	return
 
