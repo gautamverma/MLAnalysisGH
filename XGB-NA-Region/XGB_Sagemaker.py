@@ -159,7 +159,7 @@ def generateCleanFile(data_input):
 	logging.info('Creative Columns Cleaned');
 
 	# Generate the unique set and map values
-	df_merged_set = label_column(df_merged_set, 'container_id')
+	df_merged_set = label_column(df_merged_set, data_input[IFOLDER_KEY], 'container_id')
 
 	logging.info("Dataframe Shape "+str(df_merged_set.shape))
 	df_merged_set.to_csv(data_input[ITRAINING_FP], index=False, encoding='utf-8')
