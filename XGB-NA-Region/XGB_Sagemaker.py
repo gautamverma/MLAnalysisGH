@@ -112,9 +112,9 @@ def loadAndMerge(data_input):
 	return df_merged_set
 
 def label_column(df, baseFolder, column):
-	map_file = baseFolder + columnNm + "_map.dict"
+	map_file = baseFolder + column + "_map.dict"
 	if path.exists(map_file):
-		logging.info("Label unique hash file exists for col: "+ columnNm)
+		logging.info("Label unique hash file exists for col: "+ column)
 		logging.info("Filename is "+map_file)
 		unique_container_id_hash = pickle.load(open(map_file, 'rb'))
 		df['container_id_label'] = df.apply (lambda row: unique_container_id_hash[row[column]], axis=1)
