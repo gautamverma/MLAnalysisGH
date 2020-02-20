@@ -152,6 +152,7 @@ def generateCleanFile(data_input):
 	df_merged_set[['component_name']] = df_merged_set[['component_name']].fillna(value=CONSTANT_FILLER)
 	df_merged_set[['component_namespace']] = df_merged_set[['component_namespace']].fillna(value=CONSTANT_FILLER)
 	df_merged_set[['component_display_name']] = df_merged_set[['component_display_name']].fillna(value=CONSTANT_FILLER)
+	df_merged_set[['container_id']] = df_merged_set[['container_id']].fillna(value=CONSTANT_FILLER)
 
 	# Creative Columns
 	df_merged_set[['objective']] = df_merged_set[['objective']].fillna(value=CONSTANT_FILLER)

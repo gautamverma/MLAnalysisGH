@@ -36,6 +36,7 @@ def generateLabelfromDf(baseFolder, columnNm, filepath):
 		return
 
 	df = pd.read_csv(baseFolder + filepath, skiprows=0, header=0)
+	df[[columnNm]] = df[[columnNm]].fillna(value=CONSTANT_FILLER)
 
 	unique_column_list = df[columnNm].unique().tolist()
 	logging.info("unique list head "+str(unique_column_list[:5]))
