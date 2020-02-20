@@ -78,27 +78,27 @@ def loadAndMerge(data_input):
 	# creative_metadata_file {4}
 	
 	file1 = downloadFileFromS3(data_input[IBUCKET_KEY], data_input[IFILES_KEY][0],
-		 data_input[IFOLDER_KEY] + '/' + Path(data_input[IFILES_KEY][0]).stem)
+		 data_input[IFOLDER_KEY] + Path(data_input[IFILES_KEY][0]).stem)
 	df1 = pd.read_csv(file1, skiprows=0, header=0)
 	logging.info(df1.columns)
 
 	file2 = downloadFileFromS3(data_input[IBUCKET_KEY], data_input[IFILES_KEY][1],
-		 data_input[IFOLDER_KEY] + '/' + Path(data_input[IFILES_KEY][1]).stem)
+		 data_input[IFOLDER_KEY] + Path(data_input[IFILES_KEY][1]).stem)
 	df2 = pd.read_csv(file2, skiprows=0, header=0)
 	logging.info(df2.columns)
 
 	file3 = downloadFileFromS3(data_input[IBUCKET_KEY], data_input[IFILES_KEY][2],
-		data_input[IFOLDER_KEY] + '/' + Path(data_input[IFILES_KEY][2]).stem)
+		data_input[IFOLDER_KEY] + Path(data_input[IFILES_KEY][2]).stem)
 	df3 = pd.read_csv(file3, skiprows=0, header=0)
 	logging.info(df3.columns)
 
 	file4 = downloadFileFromS3(data_input[IBUCKET_KEY], data_input[IFILES_KEY][3],
-		data_input[IFOLDER_KEY] + '/' + Path(data_input[IFILES_KEY][3]).stem)
+		data_input[IFOLDER_KEY] + Path(data_input[IFILES_KEY][3]).stem)
 	df4 = pd.read_csv(file4, skiprows=0, header=0)
 	logging.info(df4.columns)
 
 	file5 = downloadFileFromS3(data_input[IBUCKET_KEY], data_input[IFILES_KEY][4],
-		data_input[IFOLDER_KEY] + '/' + Path(data_input[IFILES_KEY][4]).stem)
+		data_input[IFOLDER_KEY] + Path(data_input[IFILES_KEY][4]).stem)
 	df5 = pd.read_csv(file5, skiprows=0, header=0)
 	logging.info(df5.columns)
 
