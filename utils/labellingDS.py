@@ -47,7 +47,6 @@ def generateLabelfromDf(baseFolder, columnNm, filepath):
 		position = position + 1
 
 	logging.info('Label done for '+ columnNm)
-	logging.info(str(dict(islice(unique_column_hash.iteritems(), 0, 5))))
 	pickle.dump(unique_column_hash, open(map_file, 'wb'))
 	return
 
