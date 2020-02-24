@@ -203,7 +203,7 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder.fit(df)
 	return one_hot_encoder
 
-def trainModel(learning_rate, max_depth, training_file_name, model_filename, impression_count=10):
+def trainModel(learning_rate, max_depth, training_file_name, base_folder, model_filename, impression_count=10):
 
 	learning_params = {
 	    'objective' : 'multi:softmax',
@@ -280,18 +280,18 @@ def trainModel(learning_rate, max_depth, training_file_name, model_filename, imp
 		chunkcount = chunkcount + 1
 		logging.info("Model saved "+str(xg_reg))
 
-	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep, impression_count)
+	saveModel(xg_reg, learning_rate, max_depth, columns_to_keep, impression_count, base_folder)
 	predict(training_file_name, one_hot_encoder, xg_reg, impression_count)
 	return
 
-def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep, impression_count):
+def saveModel(xg_reg, learning_rate_val, max_depth_val, columns_to_keep, impression_count, base_folder):
 
-	model_filename =  '//home/ec2-user/SageMaker/models/XGB_MODEL_impression-{}_learning-{}_max_depth-{}_timestamp{}.sav'
+	model_filename =  base_folder + 'models/XGB_MODEL_impression-{}_learning-{}_max_depth-{}_timestamp{}.sav'
 	timestamp_value = int(datetime.datetime.now().timestamp())
 	model_filename  = model_filename.format(impression_count, learning_rate_val, max_depth_val, timestamp_value) 
 	pickle.dump(xg_reg, open(model_filename, 'wb'))
 	
-	column_filename =  '/home/ec2-user/SageMaker/models/XGB_MODEL_COLUMN_{}.sav'
+	column_filename =  base_folder + 'models/XGB_MODEL_COLUMN_{}.sav'
 	column_filename = column_filename.format(timestamp_value)
 	pickle.dump(columns_to_keep, open(column_filename, 'wb'))
 	logging.info("Model and columns are saved")
@@ -359,7 +359,7 @@ def startSteps(learning_rate, max_depth, impression_count, base_folder, model_fi
 	data_input[ITRAINING_FP] = base_folder + '/training_file'
 
 	generateCleanFile(data_input)
-	trainModel(learning_rate, max_depth, data_input[ITRAINING_FP], model_filename, impression_count)
+	trainModel(learning_rate, max_depth, data_input[ITRAINING_FP], data_input[IFOLDER_KEY], model_filename, impression_count)
 
 def __main__():
 	# count the arguments
