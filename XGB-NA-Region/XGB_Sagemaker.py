@@ -36,6 +36,7 @@ CHUNKSIZE = 250000
 
 # Default value ACTUAL SIZE 75%
 TRAIN_ITERATION = 30
+TRAIN_MOD_COUNT = 10
 
 CONSTANT_FILLER = 'missing'
 NUMERIC_FILLER = 0
@@ -241,9 +242,9 @@ def trainModel(learning_rate, max_depth, training_file_name, base_folder, model_
 	logging.info("Training for placements impressions digit count ")
 	logging.info("Training for total chunks : "+str(TRAIN_ITERATION))
 	for chunk in pd.read_csv(training_file_name, chunksize=CHUNKSIZE):
-		# Train on a part of dataset and predict on other
-		if(chunkcount>TRAIN_ITERATION):
-			break
+		if(chunkcount%TRAIN_MOD_COUNT == 0):
+			chunkcount = chunkcount + 1
+			continue
 
 		logging.info('Starting Training - '+str(chunkcount))
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
@@ -308,7 +309,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg, impression_count):
 
 	chunkcount = 1
 	for chunk in pd.read_csv(training_file_name, chunksize=CHUNKSIZE):
-		if(chunkcount<=TRAIN_ITERATION):
+		if(chunkcount%TRAIN_MOD_COUNT != 0):
 			chunkcount = chunkcount + 1
 			continue
 
