@@ -313,6 +313,7 @@ def predict(training_file_name, one_hot_encoder, xg_reg, impression_count):
 			chunkcount = chunkcount + 1
 			continue
 
+		logging.info('Starting Predication - '+str(chunkcount))
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
 		
 		# Get only the columns to evaluate
