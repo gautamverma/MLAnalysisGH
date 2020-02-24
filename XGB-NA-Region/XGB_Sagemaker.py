@@ -246,8 +246,6 @@ def trainModel(learning_rate, max_depth, training_file_name, base_folder, model_
 			chunkcount = chunkcount + 1
 			continue
 
-		if(chunkcount>2):
-			break;
 		logging.info('Starting Training - '+str(chunkcount))
 		chunk['result'] = chunk.apply (lambda row: label_result(row), axis=1)
 
