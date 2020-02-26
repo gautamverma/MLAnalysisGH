@@ -221,8 +221,10 @@ def trainModel(learning_rate, max_depth, training_file_name, base_folder, model_
 
 	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
+	#categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
+	#					'component_display_name', 'customer_targeting', 'site']
 	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
-						'component_display_name', 'customer_targeting', 'site']
+						'component_display_name', 'customer_targeting', 'site', 'objective', 'intent']
 
 	startOneHotIndex = len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
@@ -301,9 +303,12 @@ def predict(training_file_name, one_hot_encoder, xg_reg, impression_count):
 
 	YColumns = ['result']
 	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
-	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
-						'component_display_name', 'customer_targeting', 'site']
+	#categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
+	#					'component_display_name', 'customer_targeting', 'site']
 
+	# Added 2 creative column in the set
+	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
+					'component_display_name', 'customer_targeting', 'site', 'objective', 'intent']
 	startOneHotIndex = len(numericalCols)
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 
