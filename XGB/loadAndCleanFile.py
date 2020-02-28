@@ -1,16 +1,13 @@
-import sys
 import boto3
 import pickle
-import logging
-import datetime
+from os import path
+
+import boto3
+import constants as const
+import pandas as pd
+import s3utils as s3utils
 import sagemaker
 
-import numpy as np
-from os import path
-import pandas as pd
-
-import constants as const
-import s3utils as s3utils
 
 def label_column(df, baseFolder, column):
 	map_file = baseFolder + column + "_map.dict"
@@ -101,7 +98,6 @@ def loadAndMerge(data_input):
 	return df_merged_set
 
 def generateCleanFile(data_input):
-
 	training_file = data_input[const.ITRAINING_FP]
 	if path.exists(training_file):
 		logging.info("Training file is already present")

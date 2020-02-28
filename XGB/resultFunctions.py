@@ -41,3 +41,14 @@ def useDigitClassifier7ValueSet(row):
 	elif(row['impressions']<1000000):
 		return 5	
 	return 6
+
+def callFunctionByName(row, functionName):
+	if(functionName == 'use10Classifer'):
+		return use10Classifer(row)
+	elif (functionName == 'useDigitClassifier5ValueSet'):
+		return useDigitClassifier5ValueSet(row)
+	elif (functionName == 'useDigitClassifier6ValueSet'):
+		return useDigitClassifier6ValueSet(row)
+	elif (functionName == 'useDigitClassifier7ValueSet'):
+		return useDigitClassifier7ValueSet(row)
+	return use10Classifer(row)
