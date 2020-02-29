@@ -41,7 +41,9 @@ def prepareInputData(bucket, jsonprefix, base_folder):
         data_input[const.IMODEL_FP] = base_folder + data[const.IMODEL_FN]
 
         data_input[const.IPARAMS_KEY] = data[const.IPARAMS_KEY]
+        data_input[const.ICHUNKSIZE_KEY] = data[const.ICHUNKSIZE_KEY]
         data_input[const.ITRAIN_ITERATIONS] = data[const.ITRAIN_ITERATIONS]
+        data_input[const.IOBJECTIVE_KEY] = data[const.IOBJECTIVE_KEY]
 
     return data_input
 
