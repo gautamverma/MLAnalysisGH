@@ -5,8 +5,7 @@ import boto3
 
 
 # Prefix will also contain the filename which we build when calling it Path(prefix).stem
-def downloadFileFromS3(bucket, prefix, filepath):
-	s3 = boto3.resource('s3')
+def downloadFileFromS3(s3, bucket, prefix, filepath):
 	if(path.exists(filepath)):
 		logging.info(filepath + " already exists")
 		return filepath

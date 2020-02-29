@@ -12,12 +12,14 @@ ALL_CONSUMER = 'allCustomer'
 
 ## Data Input Keys
 IBUCKET_KEY = 'input_bucket'
+IPREFIX_KEY = 'input_prefix'
+
 IRESULT_PREFIX_KEY = 'result_prefix'
 
 IFILES_KEY = 'files'
 IFOLDER_KEY = 'base_folder'
 ITRAINING_FP = 'training_file_name'
-INUMERICAL_COLS = 'numrical_cols'
+INUMERICAL_COLS = 'numerical_cols'
 ICATEGORICAL_COLS = 'categorical_cols'
 IRESULT_COL_KEY = 'result_col'
 IRESULT_FUNCTION = 'result_function'
