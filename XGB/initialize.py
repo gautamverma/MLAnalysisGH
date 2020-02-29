@@ -24,7 +24,6 @@ def prepareInputData(bucket, jsonprefix, base_folder):
         logging.info (data)
         data_input[const.IBUCKET_KEY] = data[const.IBUCKET_KEY]
         data_input[const.IPREFIX_KEY] = data[const.IPREFIX_KEY]
-        data_input[const.IRESULT_PREFIX_KEY] = data[const.IRESULT_PREFIX_KEY]
 
         data_input[const.IFILES_KEY] = data[const.IFILES_KEY]
         data_input[const.ISTARTEGY_KEY] = data[const.ISTARTEGY_KEY]
