@@ -55,13 +55,13 @@ def start_steps(bucket, jsonprefix, base_folder):
 
     # Save Model on the disk
     utils.saveDataOnDisk(xgb_model, data_input[const.IMODEL_FP])
-    s3utils.uploadFiletoS3(bucket, data_input[const.IRESULT_PREFIX_KEY] + '/' + data_input[const.IMODEL_FN],
+    s3utils.uploadFiletoS3(bucket, data_input[const.IPREFIX_KEY] + data_input[const.IMODEL_FN],
                            data_input[const.IMODEL_FP])
 
     # Predict and save the accuracy per chunk values
     accuracy_scope_filename, accuracy_scope_filepath = predictXGBModel(data_input, xgb_model)
     s3utils.uploadFiletoS3(data_input[const.IBUCKET_KEY],
-                           data_input[const.IRESULT_PREFIX_KEY] + '/' + accuracy_scope_filename,
+                           data_input[const.IPREFIX_KEY] + accuracy_scope_filename,
                            accuracy_scope_filepath)
 
 
