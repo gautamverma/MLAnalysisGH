@@ -65,8 +65,10 @@ def __main__():
     # count the arguments
     if len(sys.argv) < 3:
         raise RuntimeError("Please provide the bucket,prefix to load the input data config and base folder")
-	logging.info("Parameters ::")
-	logging.info(sys.argv)
+
+    logging.info("Parameters ::")
+    logging.info(sys.argv)
+
     # Validations
     if sys.argv[3].endswith('/'):
         raise RuntimeError('Please add base folder ending with /')
