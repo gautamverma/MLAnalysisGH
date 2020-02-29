@@ -75,6 +75,7 @@ def loadAndMerge(data_input):
 
 	df4[["language"]] = df4[['language']].fillna(value=const.CONSTANT_FILLER)
 	df4[['container_id']] = df4[['container_id']].fillna(value=const.CONSTANT_FILLER)
+	df4[['customer_targeting']] = df4[['customer_targeting']].fillna(value=const.ALL_CONSUMER)
 
 	# Generate the unique set and map values
 	df4 = label_column(df4, base_folder, 'container_id')
@@ -87,7 +88,6 @@ def loadAndMerge(data_input):
 	# Creative Columns
 	df5[['intent']] = df5[['intent']].fillna(value=const.CONSTANT_FILLER)
 	df5[['objective']] = df5[['objective']].fillna(value=const.CONSTANT_FILLER)
-	df5[['customer_targeting']] = df5[['customer_targeting']].fillna(value=const.ALL_CONSUMER)
 	logging.info('Creative Columns Cleaned')
 
 	logging.info('File Loaded')
