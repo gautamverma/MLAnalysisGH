@@ -3,9 +3,12 @@ from os import path
 
 import boto3
 
+# Log time-level and message for getting a running estimate
+logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Prefix will also contain the filename which we build when calling it Path(prefix).stem
 def downloadFileFromS3(s3, bucket, prefix, filepath):
+	logging.info("Downloading :: bucket:prefix"+bucket+":"+prefix)
 	if(path.exists(filepath)):
 		logging.info(filepath + " already exists")
 		return filepath
