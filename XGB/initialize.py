@@ -1,5 +1,6 @@
 import json
 import sys
+import logging
 
 import utils as utils
 import constants as const
@@ -9,6 +10,8 @@ from trainModel import trainXGBModel
 from predication import predictXGBModel
 from loadAndCleanFile import generateCleanFile
 
+# Log time-level and message for getting a running estimate
+logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def prepareInputData(bucket, jsonprefix, base_folder):
     filepath = s3utils.downloadFileFromS3(bucket, jsonprefix, base_folder + 'input.json')
@@ -62,7 +65,8 @@ def __main__():
     # count the arguments
     if len(sys.argv) < 3:
         raise RuntimeError("Please provide the bucket,prefix to load the input data config and base folder")
-
+	logging.info("Parameters ::")
+	logging.info(sys.argv)
     # Validations
     if sys.argv[3].endswith('/'):
         raise RuntimeError('Please add base folder ending with /')
