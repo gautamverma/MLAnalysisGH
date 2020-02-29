@@ -14,7 +14,8 @@ from loadAndCleanFile import generateCleanFile
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def prepareInputData(bucket, jsonprefix, base_folder):
-    filepath = s3utils.downloadFileFromS3(bucket, jsonprefix, base_folder + 'input.json')
+    s3 = boto3.resource ('s3')
+    filepath = s3utils.downloadFileFromS3(s3, bucket, jsonprefix, base_folder + 'input.json')
 
     data_input = {}
     with open(filepath, "r") as input_file:
