@@ -70,7 +70,7 @@ def __main__():
     logging.info(sys.argv)
 
     # Validations
-    if sys.argv[3].endswith('/'):
+    if not sys.argv[3].endswith('/'):
         raise RuntimeError('Please add base folder ending with /')
     start_steps(bucket=sys.argv[1], jsonprefix=sys.argv[2], base_folder=sys.argv[3])
 
