@@ -41,6 +41,8 @@ def predictXGBModel(data_input, xg_reg):
             continue
 
         logging.info('Starting Predication - ' + str(chunkcount))
+        logging.info('Values RESULTCOL:RESULT :: '+data_input[const.IRESULT_COL_KEY]+" - "+data_input[const.IRESULT_FUNCTION])
+        logging.info('values '+str(chunk.iloc[1080000,:]))
         chunk[data_input[const.IRESULT_COL_KEY]] = chunk.apply(lambda row: callFunctionByName(row, data_input[const.IRESULT_FUNCTION]), axis=1)
 
         # Get only the columns to evaluate
@@ -71,7 +73,6 @@ def predictXGBModel(data_input, xg_reg):
         logging.info('Report : ')
         logging.info(str(classification_report(OUTPUT, np.around(predictions))))
         chunk_accuracy[chunkcount] = accuracy
-        chunkcount = chunkcount + 1
         if chunkcount > 10:
             break
     accuracy_fn = "model_accuracy_score.sav"
