@@ -43,7 +43,6 @@ def predictXGBModel(data_input, xg_reg):
         logging.info('Starting Predication - ' + str(chunkcount))
         logging.info('Values RESULTCOL:RESULT :: '+data_input[const.IRESULT_COL_KEY])
         logging.info(" - "+data_input[const.IRESULT_FUNCTION])
-        logging.info('values '+str(chunk.iloc[1080000,:]))
         chunk[data_input[const.IRESULT_COL_KEY]] = chunk.apply(lambda row: callFunctionByName(row, data_input[const.IRESULT_FUNCTION]), axis=1)
 
         # Get only the columns to evaluate
