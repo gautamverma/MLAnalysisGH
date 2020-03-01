@@ -33,6 +33,8 @@ def removeNaN(df, categoricalCols, defValue):
 
 def exploreFile(filename):
 	df = pd.read_csv(filename, skiprows=0, header=0)
+	logging.info("List of columns with null ")
+	logging.info(df.columns[df.isna().any()].tolist())
 
 	logging.info("Shape "+str(df.shape))
 	logging.info(str(df.weblab.value_counts()))
