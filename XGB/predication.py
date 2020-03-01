@@ -65,6 +65,8 @@ def predictXGBModel(data_input, xg_reg):
         logging.info('Report : ')
         logging.info(str(classification_report(OUTPUT, np.around(predictions))))
         chunk_accuracy[chunkcount] = accuracy
-
+        chunkcount = chunkcount + 1
+        if chunkcount == 2:
+            break
     accuracy_fn = "model_accuracy_score.sav"
-    return accuracy_fn, utils.saveDataOnDisk(accuracy, data_input[const.IFOLDER_KEY] + accuracy_fn)
+    return accuracy_fn, utils.saveDataOnDisk(chunk_accuracy, data_input[const.IFOLDER_KEY] + accuracy_fn)
