@@ -40,7 +40,8 @@ def mergeDataframe(df1, df2, column, joinType='inner'):
 # Build the One hot encoder using all data
 def buildOneHotEncoder(training_file_name, categoricalCols):
 	one_hot_encoder = OneHotEncoder(sparse=False)
-	df = pd.read_csv(training_file_name, skiprows=0, header=0, usecols=categoricalCols)
+	df = pd.read_csv(training_file_name, skiprows=0, header=0)
+	df = df[categoricalCols]
 
 	one_hot_encoder.fit(df)
 	return one_hot_encoder, df.shape

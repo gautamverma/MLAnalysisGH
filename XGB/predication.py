@@ -41,8 +41,6 @@ def predictXGBModel(data_input, xg_reg):
             continue
 
         logging.info('Starting Predication - ' + str(chunkcount))
-        logging.info('Values RESULTCOL:RESULT :: '+data_input[const.IRESULT_COL_KEY])
-        logging.info(" - "+data_input[const.IRESULT_FUNCTION])
         chunk[data_input[const.IRESULT_COL_KEY]] = chunk.apply(lambda row: callFunctionByName(row, data_input[const.IRESULT_FUNCTION]), axis=1)
 
         # Get only the columns to evaluate
@@ -61,9 +59,7 @@ def predictXGBModel(data_input, xg_reg):
         logging.info('One hot encoding done for : '+str(chunkcount))
 
         dataMatrix = xgb.DMatrix(np.column_stack((INPUT, one_hot_encoded)))
-
         predictions = xg_reg.predict(dataMatrix)
-        chunkcount = chunkcount + 1
 
         # Result Analysis for Chunk
         matrix = confusion_matrix(OUTPUT, np.around(predictions))
@@ -73,6 +69,7 @@ def predictXGBModel(data_input, xg_reg):
         logging.info('Report : ')
         logging.info(str(classification_report(OUTPUT, np.around(predictions))))
         chunk_accuracy[chunkcount] = accuracy
+        chunkcount = chunkcount + 1
         if chunkcount > 10:
             break
     accuracy_fn = "model_accuracy_score.sav"
