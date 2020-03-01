@@ -1,22 +1,17 @@
-import sys
-import pickle
 import logging
 
-from os import path
-
+import constants as const
 import numpy as np
 import pandas as pd
 import xgboost as xgb
+from enumclasses import MLFunction
+from resultFunctions import callFunctionByName
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
 
 import utils as utils
-import s3utils as s3utils
-import constants as const
 
-from enumclasses import MLFunction
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from resultFunctions import callFunctionByName
-from sklearn.metrics import classification_report
 
 def predictXGBModel(data_input, xg_reg):
 
@@ -35,7 +30,7 @@ def predictXGBModel(data_input, xg_reg):
     logging.info("Predicating for  " + data_input[const.IOBJECTIVE_KEY])
     logging.info("Predicating using stragegy : " + str(data_input[const.ISTARTEGY_KEY]))
     for chunk in pd.read_csv(data_input[const.ITRAINING_FP], chunksize=data_input[const.ICHUNKSIZE_KEY]):
-        if not utils.useChunk(data_input[const.ISTARTEGY_KEY], MLFunction.Test, chunkcount, total_chunk_count):
+        if not utils.useChunk(data_input[const.ISTARTEGY_KEY], MLFunction.Validate, chunkcount, total_chunk_count):
             chunkcount = chunkcount + 1
             continue
 
