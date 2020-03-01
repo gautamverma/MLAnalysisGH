@@ -40,7 +40,7 @@ def predictXGBModel(data_input, xg_reg):
             continue
 
         logging.info('Starting Predication - ' + str(chunkcount))
-        chunk['result'] = chunk.apply(lambda row: callFunctionByName(row, data_input[const.IRESULT_FUNCTION]), axis=1)
+        chunk[data_input[const.IRESULT_COL_KEY]] = chunk.apply(lambda row: callFunctionByName(row, data_input[const.IRESULT_FUNCTION]), axis=1)
 
         # Get only the columns to evaluate
         chunk = chunk[columns_to_keep + ['weblab']]

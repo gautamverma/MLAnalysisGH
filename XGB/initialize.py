@@ -31,6 +31,7 @@ def prepareInputData(bucket, jsonprefix, base_folder):
         data_input[const.IMULTIPLE_TRAINING_FILES] = []
         data_input[const.IMULTIPLE_METRICS_FILES] = data[const.IMULTIPLE_METRICS_FILES]
 
+        data_input[const.IRESULT_COL_KEY] = data[const.IRESULT_COL_KEY]
         data_input[const.INUMERICAL_COLS] = data[const.INUMERICAL_COLS]
         data_input[const.ICATEGORICAL_COLS] = data[const.ICATEGORICAL_COLS]
 
