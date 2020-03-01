@@ -64,6 +64,9 @@ def loadAndMerge(data_input):
 	df3 = pd.read_csv(file3, skiprows=0, header=0)
 	logging.info(df3.columns)
 
+	df3[['site']] = df3[['site']].fillna (value=const.CONSTANT_FILLER)
+	df3[['slot_names']] = df3[['slot_names']].fillna (value=const.CONSTANT_FILLER)
+	df3[['container_type']] = df3[['component_name']].fillna (value=const.CONSTANT_FILLER)
 	df3[['component_name']] = df3[['component_name']].fillna(value=const.CONSTANT_FILLER)
 	df3[['component_namespace']] = df3[['component_namespace']].fillna(value=const.CONSTANT_FILLER)
 	df3[['component_display_name']] = df3[['component_display_name']].fillna(value=const.CONSTANT_FILLER)
