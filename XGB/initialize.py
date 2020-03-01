@@ -2,6 +2,7 @@ import json
 import sys
 import boto3
 import logging
+import datetime
 
 import utils as utils
 import constants as const
@@ -24,6 +25,9 @@ def prepareInputData(bucket, jsonprefix, base_folder):
         logging.info (data)
         data_input[const.IBUCKET_KEY] = data[const.IBUCKET_KEY]
         data_input[const.IPREFIX_KEY] = data[const.IPREFIX_KEY]
+
+        timestamp_value = int (datetime.datetime.now ().timestamp ())
+        data_input[const.IRESULT_PREFIX_KEY] = data[const.IPREFIX_KEY] + "/" + str(timestamp_value) + "/"
 
         data_input[const.IFILES_KEY] = data[const.IFILES_KEY]
         data_input[const.ISTARTEGY_KEY] = data[const.ISTARTEGY_KEY]
@@ -56,13 +60,13 @@ def start_steps(bucket, jsonprefix, base_folder):
 
     # Save Model on the disk
     utils.saveDataOnDisk(xgb_model, data_input[const.IMODEL_FP])
-    s3utils.uploadFiletoS3(bucket, data_input[const.IPREFIX_KEY] + data_input[const.IMODEL_FN],
+    s3utils.uploadFiletoS3(bucket, data_input[const.IRESULT_PREFIX_KEY] + data_input[const.IMODEL_FN],
                            data_input[const.IMODEL_FP])
 
     # Predict and save the accuracy per chunk values
     accuracy_scope_filename, accuracy_scope_filepath = predictXGBModel(data_input, xgb_model)
     s3utils.uploadFiletoS3(data_input[const.IBUCKET_KEY],
-                           data_input[const.IPREFIX_KEY] + accuracy_scope_filename,
+                           data_input[const.IRESULT_PREFIX_KEY] + accuracy_scope_filename,
                            accuracy_scope_filepath)
 
 
@@ -83,3 +87,7 @@ def __main__():
 # This is required to call the main function
 if __name__ == "__main__":
     __main__()
+
+#Example Command
+#nohup python3 -u initialize.py deep-learning-fe-datasets
+# january/15Jan15Feb/input.json /home/ec2-user/SageMaker/FE-15Jan15Feb-dataset/ > FE-BinaryRun1March &
