@@ -1,6 +1,7 @@
 import sys
 import pickle
 import logging
+from os import path
 import pandas as pd
 
 from enumclasses import MLFunction
@@ -53,7 +54,14 @@ def removeNaN(df, categoricalCols, defValue):
 	return df
 
 def saveDataOnDisk(data, filepath):
-	pickle.dump(data, open(filepath, 'wb'))
+	logging.info("Saving file :")
+	logging.info(data)
+	if(path.exists (filepath)):
+		logging.info("File path already exists : "+filepath)
+		return filepath
+	file = open(filepath, 'wb')
+	pickle.dump(data, file)
+	file.close()
 	return filepath
 
 # ----------------------------------------------------------------------------------------------------------
