@@ -74,6 +74,6 @@ def trainXGBModel(data_input):
 			xg_reg = xgb.train(data_input[const.IPARAMS_KEY], dataMatrix, data_input[const.ITRAIN_ITERATIONS], xgb_model=xg_reg)
 		chunkcount = chunkcount + 1
 		logging.info("Model saved for "+chunkcount)
-
-
+		if chunkcount == 2:
+			break
 	return xg_reg

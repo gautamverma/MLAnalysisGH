@@ -39,7 +39,6 @@ def buildOneHotEncoder(training_file_name, categoricalCols):
 	df = pd.read_csv(training_file_name, skiprows=0, header=0)
 	df = df[categoricalCols]
 
-	logging.info("Columns for one hot encoding - " +str(df.columns))
 	one_hot_encoder.fit(df)
 	return one_hot_encoder, df.shape
 

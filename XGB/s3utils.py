@@ -21,6 +21,7 @@ def uploadFiletoS3(bucket, prefix, filepath):
 	s3 = boto3.resource('s3')
 	if(path.exists(filepath)):
 		logging.info("Uploading file : " + filepath)
+		logging.info("Uploading :: bucket:prefix" + bucket + ":" + prefix)
 		s3.Bucket('mybucket').upload_file(prefix, filepath)
 		return filepath
 	raise RuntimeError("file : " + filepath +" doesn't exists, so upload failed")
