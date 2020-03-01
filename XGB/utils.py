@@ -14,10 +14,10 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 def useChunk(mlFunction, startegy, chunkcount, maxTrainingCount):
 	logging.info("MLFunc "+str(mlFunction))
 	logging.info("Star " + str (startegy))
-	if(startegy == Startegy.Continous):
+	if startegy == Startegy.Continous:
 		# MAX COUNT can't be null for the continous training
 		if(maxTrainingCount is None):
-			raise RuntimeError("Please provide max training count for iterations")
+			raise RuntimeError('Please provide max training count for iterations')
 		if(mlFunction == MLFunction.Train):
 			if(chunkcount<maxTrainingCount):
 				return True
@@ -61,12 +61,12 @@ def saveDataOnDisk(data, filepath):
 
 # ----------------------------------------------------------------------------------------------------------
 # def __main__():
-# 	print("Testing train, Mod10, 4  "+str(useChunk(MLFunction.Train, Startegy.Mod10, 4)))
-# 	print("Testing train, Mod10, 10 "+str(useChunk(MLFunction.Train, Startegy.Mod10, 10)))
-
-# 	print("Testing not of  validate, Mod10, 34 "+str(not useChunk(MLFunction.Validate, Startegy.Mod10, 34)))
-# 	print("Testing not of validate, Mod10, 20 "+str(not useChunk(MLFunction.Validate, Startegy.Mod10, 20)))
-
-
+# 	#print("Testing train, Mod10, 4  "+str(useChunk(MLFunction.Train, Startegy.Mod10, 4, 200)))
+# 	#print("Testing train, Mod10, 10 "+str(useChunk(MLFunction.Train, Startegy.Mod10, 10, 200)))
+#
+# 	print("Testing not of  validate, Mod10, 34 "+str(not useChunk(MLFunction.Validate, Startegy['Mod10'], 9, 200)))
+# 	print("Testing not of validate, Mod10, 20 "+str(not useChunk(MLFunction.Validate, Startegy['Mod10'], 20, 200)))
+#
+#
 # if __name__ == "__main__":
 # 	__main__()

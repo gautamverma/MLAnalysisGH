@@ -5,7 +5,9 @@ import constants as const
 import numpy as np
 import pandas as pd
 import xgboost as xgb
+
 from enumclasses import MLFunction
+from enumclasses import Startegy
 from resultFunctions import callFunctionByName
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
@@ -33,7 +35,7 @@ def predictXGBModel(data_input, xg_reg):
     logging.info("Predicating for  " + data_input[const.IOBJECTIVE_KEY])
     logging.info("Predicating using stragegy : " + str(data_input[const.ISTARTEGY_KEY]))
     for chunk in pd.read_csv(data_input[const.ITRAINING_FP], chunksize=data_input[const.ICHUNKSIZE_KEY]):
-        if not utils.useChunk(MLFunction.Validate, data_input[const.ISTARTEGY_KEY], chunkcount, total_chunk_count):
+        if not utils.useChunk(MLFunction.Validate, Startegy[data_input[const.ISTARTEGY_KEY]], chunkcount, total_chunk_count):
             logging.info("Chunkcount:  "+str(chunkcount))
             chunkcount = chunkcount + 1
             continue
