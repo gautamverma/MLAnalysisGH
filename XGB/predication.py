@@ -21,7 +21,7 @@ from sklearn.metrics import classification_report
 def predictXGBModel(data_input, xg_reg):
 
     chunk_accuracy = {}
-    YColumns = data_input[const.IRESULT_COL_KEY]
+    YColumns = [data_input[const.IRESULT_COL_KEY]]
     numericalCols = data_input[const.INUMERICAL_COLS]
     categoricalCols = data_input[const.ICATEGORICAL_COLS]
 
