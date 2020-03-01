@@ -1,3 +1,4 @@
+import sys
 import logging
 
 import constants as const
@@ -12,6 +13,8 @@ from sklearn.metrics import confusion_matrix
 
 import utils as utils
 
+# Log time-level and message for getting a running estimate
+logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def predictXGBModel(data_input, xg_reg):
 
@@ -31,6 +34,7 @@ def predictXGBModel(data_input, xg_reg):
     logging.info("Predicating using stragegy : " + str(data_input[const.ISTARTEGY_KEY]))
     for chunk in pd.read_csv(data_input[const.ITRAINING_FP], chunksize=data_input[const.ICHUNKSIZE_KEY]):
         if not utils.useChunk(data_input[const.ISTARTEGY_KEY], MLFunction.Validate, chunkcount, total_chunk_count):
+            logging.info("Chunkcount:  "+str(chunkcount))
             chunkcount = chunkcount + 1
             continue
 

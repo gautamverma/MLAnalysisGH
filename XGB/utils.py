@@ -7,7 +7,7 @@ from enumclasses import Startegy
 from sklearn.preprocessing import OneHotEncoder
 
 def useChunk(mlFunction, startegy, chunkcount, maxTrainingCount):
-	if(startegy== Startegy.Continous):
+	if(startegy == Startegy.Continous):
 		# MAX COUNT can't be null for the continous training
 		if(maxTrainingCount is None):
 			raise RuntimeError("Please provide max training count for iterations")
@@ -22,6 +22,7 @@ def useChunk(mlFunction, startegy, chunkcount, maxTrainingCount):
 		if(mlFunction == MLFunction.Train):
 			return chunkcount%10 != 0
 		elif(mlFunction == MLFunction.Validate):
+
 			return chunkcount%10 == 0
 	return False
 
