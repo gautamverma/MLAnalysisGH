@@ -64,9 +64,6 @@ def loadAndMerge(data_input):
 	df3 = pd.read_csv(file3, skiprows=0, header=0)
 	logging.info(df3.columns)
 
-	df3[['site']] = df3[['site']].fillna (value=const.CONSTANT_FILLER)
-	df3[['slot_names']] = df3[['slot_names']].fillna (value=const.CONSTANT_FILLER)
-	df3[['container_type']] = df3[['component_name']].fillna (value=const.CONSTANT_FILLER)
 	df3[['component_name']] = df3[['component_name']].fillna(value=const.CONSTANT_FILLER)
 	df3[['component_namespace']] = df3[['component_namespace']].fillna(value=const.CONSTANT_FILLER)
 	df3[['component_display_name']] = df3[['component_display_name']].fillna(value=const.CONSTANT_FILLER)
@@ -76,8 +73,11 @@ def loadAndMerge(data_input):
 	df4 = pd.read_csv(file4, skiprows=0, header=0)
 	logging.info(df4.columns)
 
+	df4[['site']] = df4[['site']].fillna (value=const.CONSTANT_FILLER)
 	df4[["language"]] = df4[['language']].fillna(value=const.CONSTANT_FILLER)
+	df4[['slot_names']] = df4[['slot_names']].fillna (value=const.CONSTANT_FILLER)
 	df4[['container_id']] = df4[['container_id']].fillna(value=const.CONSTANT_FILLER)
+	df4[['container_type']] = df4[['component_name']].fillna (value=const.CONSTANT_FILLER)
 	df4[['customer_targeting']] = df4[['customer_targeting']].fillna(value=const.ALL_CONSUMER)
 
 	# Generate the unique set and map values
