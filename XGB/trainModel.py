@@ -21,7 +21,8 @@ def trainXGBModel(data_input):
 	# Init a base Model
 	xg_reg = {}
 
-	YColumns = data_input[const.IRESULT_COL_KEY]
+	# Predication will be always on 1 result col
+	YColumns = [data_input[const.IRESULT_COL_KEY]]
 	numericalCols = data_input[const.INUMERICAL_COLS]
 	categoricalCols = data_input[const.ICATEGORICAL_COLS]
 
