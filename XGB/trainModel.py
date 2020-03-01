@@ -43,7 +43,7 @@ def trainXGBModel(data_input):
 	logging.info("Training for  " + data_input[const.IOBJECTIVE_KEY])
 	logging.info("Training using stragegy : "+str(data_input[const.ISTARTEGY_KEY]))
 	for chunk in pd.read_csv(data_input[const.ITRAINING_FP], chunksize=data_input[const.ICHUNKSIZE_KEY]):
-		if not utils.useChunk(data_input[const.ISTARTEGY_KEY], MLFunction.Train, chunkcount, TOTAL_CHUNK_COUNT):
+		if not utils.useChunk(MLFunction.Train, data_input[const.ISTARTEGY_KEY], chunkcount, TOTAL_CHUNK_COUNT):
 			chunkcount = chunkcount + 1
 			continue
 

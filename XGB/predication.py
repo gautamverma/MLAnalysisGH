@@ -33,7 +33,7 @@ def predictXGBModel(data_input, xg_reg):
     logging.info("Predicating for  " + data_input[const.IOBJECTIVE_KEY])
     logging.info("Predicating using stragegy : " + str(data_input[const.ISTARTEGY_KEY]))
     for chunk in pd.read_csv(data_input[const.ITRAINING_FP], chunksize=data_input[const.ICHUNKSIZE_KEY]):
-        if not utils.useChunk(data_input[const.ISTARTEGY_KEY], MLFunction.Validate, chunkcount, total_chunk_count):
+        if not utils.useChunk(MLFunction.Validate, data_input[const.ISTARTEGY_KEY], chunkcount, total_chunk_count):
             logging.info("Chunkcount:  "+str(chunkcount))
             chunkcount = chunkcount + 1
             continue

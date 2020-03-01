@@ -22,7 +22,6 @@ def useChunk(mlFunction, startegy, chunkcount, maxTrainingCount):
 		if(mlFunction == MLFunction.Train):
 			return chunkcount%10 != 0
 		elif(mlFunction == MLFunction.Validate):
-
 			return chunkcount%10 == 0
 	return False
 
