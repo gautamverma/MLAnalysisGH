@@ -77,7 +77,7 @@ def loadAndMerge(data_input):
 	df4[["language"]] = df4[['language']].fillna(value=const.CONSTANT_FILLER)
 	df4[['slot_names']] = df4[['slot_names']].fillna (value=const.CONSTANT_FILLER)
 	df4[['container_id']] = df4[['container_id']].fillna(value=const.CONSTANT_FILLER)
-	df4[['container_type']] = df4[['component_name']].fillna (value=const.CONSTANT_FILLER)
+	df4[['container_type']] = df4[['container_type']].fillna (value=const.CONSTANT_FILLER)
 	df4[['customer_targeting']] = df4[['customer_targeting']].fillna(value=const.ALL_CONSUMER)
 
 	# Generate the unique set and map values
