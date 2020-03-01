@@ -12,8 +12,6 @@ from sklearn.preprocessing import OneHotEncoder
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 def useChunk(mlFunction, startegy, chunkcount, maxTrainingCount):
-	logging.info("MLFunc "+str(mlFunction))
-	logging.info("Star " + str (startegy))
 	if startegy == Startegy.Continous:
 		# MAX COUNT can't be null for the continous training
 		if(maxTrainingCount is None):
@@ -26,10 +24,8 @@ def useChunk(mlFunction, startegy, chunkcount, maxTrainingCount):
 				return True
 	elif(startegy == Startegy.Mod10):
 		if(mlFunction == MLFunction.Train):
-			logging.info("Train "+str(chunkcount%10))
 			return chunkcount%10 != 0
 		elif(mlFunction == MLFunction.Validate):
-			logging.info("Validate "+str(chunkcount%10))
 			return chunkcount%10 == 0
 	return False
 
