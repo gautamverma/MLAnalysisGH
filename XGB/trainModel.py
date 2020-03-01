@@ -66,7 +66,7 @@ def trainXGBModel(data_input):
 
 		one_hot_encoded = one_hot_encoder.transform(ONEHOT)
 		logging.info('One hot encoding done')
-		dataMatrix = xgb.DMatrix(np.column_stack((INPUT.iloc[:,1:], one_hot_encoded)), label=OUTPUT)
+		dataMatrix = xgb.DMatrix(np.column_stack((INPUT, one_hot_encoded)), label=OUTPUT)
 
 		if(chunkcount==1):
 			xg_reg = xgb.train(data_input[const.IPARAMS_KEY], dataMatrix, data_input[const.ITRAIN_ITERATIONS])
