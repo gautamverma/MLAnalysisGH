@@ -1,6 +1,4 @@
 def use10Classifer(row):
-	if(row is none or row['impressions'] is None):
-		print("Impressions is none")
 	if(row['impressions']<10):
 		return 0
 	return 1
