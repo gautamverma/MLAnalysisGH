@@ -22,6 +22,6 @@ def uploadFiletoS3(bucket, prefix, filepath):
 	if(path.exists(filepath)):
 		logging.info("Uploading file : " + filepath)
 		logging.info("Uploading :: bucket:prefix  " + bucket + ":" + prefix)
-		s3.Bucket(bucket).upload_file(prefix, filepath)
+		s3.Bucket(bucket).upload_file(filepath, prefix)
 		return filepath
 	raise RuntimeError("file : " + filepath +" doesn't exists, so upload failed")

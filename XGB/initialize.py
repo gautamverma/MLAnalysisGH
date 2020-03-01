@@ -27,7 +27,7 @@ def prepareInputData(bucket, jsonprefix, base_folder):
         data_input[const.IPREFIX_KEY] = data[const.IPREFIX_KEY]
 
         timestamp_value = int (datetime.datetime.now ().timestamp ())
-        data_input[const.IRESULT_PREFIX_KEY] = data[const.IPREFIX_KEY] + "/" + str(timestamp_value) + "/"
+        data_input[const.IRESULT_PREFIX_KEY] = data[const.IPREFIX_KEY] + str(timestamp_value) + "/"
 
         data_input[const.IFILES_KEY] = data[const.IFILES_KEY]
         data_input[const.ISTARTEGY_KEY] = data[const.ISTARTEGY_KEY]

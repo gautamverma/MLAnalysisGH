@@ -21,6 +21,13 @@ def trainXGBModel(data_input):
 	# Init a base Model
 	xg_reg = {}
 
+	# Model present then load and return
+	model_filepath = data_input[const.IMODEL_FP]
+	if model_filepath is not None and path.exists(model_filepath):
+		logging.info("Model file present. Skipping to predication::")
+		xg_reg = pickle.load(open(model_filepath, 'rb'))
+		return xg_reg
+
 	# Predication will be always on 1 result col
 	YColumns = [data_input[const.IRESULT_COL_KEY]]
 	numericalCols = data_input[const.INUMERICAL_COLS]
@@ -29,13 +36,6 @@ def trainXGBModel(data_input):
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 	one_hot_encoder, shapeTuple = utils.buildOneHotEncoder(data_input[const.ITRAINING_FP] , categoricalCols)
 	logging.info('One hot encoder is ready')
-
-	#Model present then load and predict
-	model_filepath = data_input[const.IMODEL_FP]
-	if model_filepath is not None and path.exists(model_filepath):
-		logging.info("Model file present. Skipping to predication::")
-		xg_reg = pickle.load(open(model_filepath, 'rb'))
-		return xg_reg
 
 	chunkcount = 1
 	TOTAL_CHUNK_COUNT = shapeTuple[0] / data_input[const.ICHUNKSIZE_KEY]
