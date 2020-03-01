@@ -32,16 +32,16 @@ def removeNaN(df, categoricalCols, defValue):
 
 
 def exploreFile(filename):
-	df = pd.read_csv(filename, skiprows=0, header=0)
+
+	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
+	categoricalCols = ["component_name", "slot_names", "container_type", "component_namespace","component_display_name", "customer_targeting", "site", "objective", "intent"]
+
+	df = pd.read_csv(filename, skiprows=0, header=0, usecols=categoricalCols)
 	logging.info("List of columns with null ")
-	logging.info(df.columns[df.isna().any()].tolist())
+	logging.info(df.columns[df.isnull().any()].tolist())
 
 	logging.info("Shape "+str(df.shape))
 	logging.info(str(df.weblab.value_counts()))
-
-	numericalCols = ['impressions', 'guarantee_percentage', 'container_id_label']
-	categoricalCols = [ 'component_name', 'slot_names', 'container_type', 'component_namespace',
-						'component_display_name', 'customer_targeting', 'site']
 
 	columns_to_keep =  numericalCols + categoricalCols
 	df = df[columns_to_keep + ['weblab']]
