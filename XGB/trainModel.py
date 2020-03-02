@@ -18,7 +18,7 @@ from resultFunctions import callFunctionByName
 # Log time-level and message for getting a running estimate
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
-def trainXGBModel(data_input):
+def trainXGBModel(data_input, training_filepath):
 	# Init a base Model
 	xg_reg = {}
 
@@ -35,7 +35,7 @@ def trainXGBModel(data_input):
 	categoricalCols = data_input[const.ICATEGORICAL_COLS]
 
 	columns_to_keep = YColumns + numericalCols + categoricalCols
-	one_hot_encoder, shapeTuple = utils.buildOneHotEncoder(data_input[const.ITRAINING_FP] , categoricalCols)
+	one_hot_encoder, shapeTuple = utils.buildOneHotEncoder(training_filepath , categoricalCols)
 	logging.info('One hot encoder is ready')
 
 	chunkcount = 1
@@ -43,7 +43,7 @@ def trainXGBModel(data_input):
 
 	logging.info("Training for  " + data_input[const.IOBJECTIVE_KEY])
 	logging.info("Training using stragegy : "+str(data_input[const.ISTARTEGY_KEY]))
-	for chunk in pd.read_csv(data_input[const.ITRAINING_FP], chunksize=data_input[const.ICHUNKSIZE_KEY]):
+	for chunk in pd.read_csv(training_filepath, chunksize=data_input[const.ICHUNKSIZE_KEY]):
 		if not utils.useChunk(MLFunction.Train, Startegy[data_input[const.ISTARTEGY_KEY]], chunkcount, TOTAL_CHUNK_COUNT):
 			chunkcount = chunkcount + 1
 			continue

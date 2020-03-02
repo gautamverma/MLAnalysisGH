@@ -35,6 +35,9 @@ IMODEL_FN = "model_filename"
 IMULTIPLE_METRICS_FILES = 'multiple_metric_files'
 IMULTIPLE_TRAINING_FILES = 'multiple_training_files'
 
+NON_MARKETING_FILTERED_FILE = 'non_marketing_filtered_file'
+PROD_ENVIROMENT_FILTERED_FILE = 'prod_data_filtered_file'
+
 #	Example data imput
 #	data_input = {}
 #	data_input[IBUCKET_KEY] = 'gautam.placement-metrics-prod'

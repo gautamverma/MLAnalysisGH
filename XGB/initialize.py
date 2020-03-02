@@ -7,6 +7,7 @@ import datetime
 import utils as utils
 import constants as const
 import s3utils as s3utils
+import data_filters as filters
 
 from trainModel import trainXGBModel
 from predication import predictXGBModel
@@ -25,9 +26,6 @@ def prepareInputData(bucket, jsonprefix, base_folder):
         logging.info (data)
         data_input[const.IBUCKET_KEY] = data[const.IBUCKET_KEY]
         data_input[const.IPREFIX_KEY] = data[const.IPREFIX_KEY]
-
-        timestamp_value = int (datetime.datetime.now ().timestamp ())
-        data_input[const.IRESULT_PREFIX_KEY] = data[const.IPREFIX_KEY] + str(timestamp_value) + "/"
 
         data_input[const.IFILES_KEY] = data[const.IFILES_KEY]
         data_input[const.ISTARTEGY_KEY] = data[const.ISTARTEGY_KEY]
@@ -52,24 +50,34 @@ def prepareInputData(bucket, jsonprefix, base_folder):
 
     return data_input
 
+def buildPredicationModel(data_input, training_file, s3_prefix):
+    xgb_model = trainXGBModel (data_input, training_file)
+
+    # Save Model on the disk
+    utils.saveDataOnDisk (xgb_model, data_input[const.IMODEL_FP])
+    s3utils.uploadFiletoS3 (data_input[const.IBUCKET_KEY], s3_prefix + data_input[const.IMODEL_FN],
+                            data_input[const.IMODEL_FP])
+
+    # Predict and save the accuracy per chunk values
+    accuracy_scope_filename, accuracy_scope_filepath = predictXGBModel (data_input, training_file,  xgb_model)
+    s3utils.uploadFiletoS3 (data_input[const.IBUCKET_KEY],
+                            s3_prefix + accuracy_scope_filename,
+                            accuracy_scope_filepath)
 
 def start_steps(bucket, jsonprefix, base_folder):
     data_input = prepareInputData(bucket, jsonprefix, base_folder)
     generateCleanFile(data_input)
 
-    xgb_model = trainXGBModel(data_input)
+    timestamp_value = int (datetime.datetime.now ().timestamp ())
+    buildPredicationModel(data_input, data_input[const.ITRAINING_FP], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_full/")
 
-    # Save Model on the disk
-    utils.saveDataOnDisk(xgb_model, data_input[const.IMODEL_FP])
-    s3utils.uploadFiletoS3(bucket, data_input[const.IRESULT_PREFIX_KEY] + data_input[const.IMODEL_FN],
-                           data_input[const.IMODEL_FP])
+    data_input = filters.filterProdEnviroment(data_input)
+    timestamp_value = int (datetime.datetime.now ().timestamp ())
+    buildPredicationModel(data_input, data_input[const.PROD_ENVIROMENT_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_ProdFiltered/")
 
-    # Predict and save the accuracy per chunk values
-    accuracy_scope_filename, accuracy_scope_filepath = predictXGBModel(data_input, xgb_model)
-    s3utils.uploadFiletoS3(data_input[const.IBUCKET_KEY],
-                           data_input[const.IRESULT_PREFIX_KEY] + accuracy_scope_filename,
-                           accuracy_scope_filepath)
-
+    data_input = filters.filterNonMarketingData(data_input)
+    timestamp_value = int (datetime.datetime.now ().timestamp ())
+    buildPredicationModel(data_input, data_input[const.NON_MARKETING_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_NonMarketingFiltered/")
 
 def __main__():
     # count the arguments
@@ -78,12 +86,10 @@ def __main__():
 
     logging.info("Parameters ::")
     logging.info(sys.argv)
-
     # Validations
     if not sys.argv[3].endswith('/'):
         raise RuntimeError('Please add base folder ending with /')
     start_steps(bucket=sys.argv[1], jsonprefix=sys.argv[2], base_folder=sys.argv[3])
-
 
 # This is required to call the main function
 if __name__ == "__main__":

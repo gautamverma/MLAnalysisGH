@@ -19,14 +19,14 @@ import utils as utils
 logging.basicConfig (stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 
-def predictXGBModel(data_input, xg_reg):
+def predictXGBModel(data_input, training_file,  xg_reg):
     chunk_accuracy = {}
     YColumns = [data_input[const.IRESULT_COL_KEY]]
     numericalCols = data_input[const.INUMERICAL_COLS]
     categoricalCols = data_input[const.ICATEGORICAL_COLS]
 
     columns_to_keep = YColumns + numericalCols + categoricalCols
-    one_hot_encoder, shapeTuple = utils.buildOneHotEncoder (data_input[const.ITRAINING_FP], categoricalCols)
+    one_hot_encoder, shapeTuple = utils.buildOneHotEncoder (training_file, categoricalCols)
     logging.info ('One hot encoder is ready')
 
     chunkcount = 1
@@ -34,7 +34,7 @@ def predictXGBModel(data_input, xg_reg):
 
     logging.info ("Predicating for  " + data_input[const.IOBJECTIVE_KEY])
     logging.info ("Predicating using stragegy : " + str (data_input[const.ISTARTEGY_KEY]))
-    for chunk in pd.read_csv (data_input[const.ITRAINING_FP], chunksize=data_input[const.ICHUNKSIZE_KEY]):
+    for chunk in pd.read_csv (training_file, chunksize=data_input[const.ICHUNKSIZE_KEY]):
         if not utils.useChunk (MLFunction.Validate, Startegy[data_input[const.ISTARTEGY_KEY]], chunkcount,
                                total_chunk_count):
             logging.info ("Chunkcount:  " + str (chunkcount))
