@@ -68,13 +68,16 @@ def start_steps(bucket, jsonprefix, base_folder):
     data_input = prepareInputData(bucket, jsonprefix, base_folder)
     generateCleanFile(data_input)
 
+    utils.logBreak()
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.ITRAINING_FP], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_full/")
 
+    utils.logBreak()
     data_input = filters.filterProdEnviroment(data_input)
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.PROD_ENVIROMENT_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_ProdFiltered/")
 
+    utils.logBreak()
     data_input = filters.filterNonMarketingData(data_input)
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.NON_MARKETING_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_NonMarketingFiltered/")

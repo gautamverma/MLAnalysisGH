@@ -64,6 +64,10 @@ def saveDataOnDisk(data, filepath):
 	file.close()
 	return filepath
 
+def logBreak():
+	logging.info(" **********************  END  *********************** ")
+	logging.info("\n\n\n\n\n\n")
+	logging.info(" ********************** START *********************** ")
 # ----------------------------------------------------------------------------------------------------------
 # def __main__():
 # 	#print("Testing train, Mod10, 4  "+str(useChunk(MLFunction.Train, Startegy.Mod10, 4, 200)))
