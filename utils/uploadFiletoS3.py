@@ -12,7 +12,7 @@ from pathlib import Path
 
 
 def saveFileS3(s3, bucket, prefix, filepath, model_filename):
-	s3.Bucket(input_bucket).upload_file(filepath,  prefix + model_filename)
+	s3.Bucket(bucket).upload_file(filepath,  prefix + model_filename)
 
 
 def __main__():
