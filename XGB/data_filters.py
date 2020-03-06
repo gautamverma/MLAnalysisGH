@@ -8,6 +8,12 @@ import pandas as pd
 # Log time-level and message for getting a running estimate
 logging.basicConfig (stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+def updateModelNmAndFilePath(data_input, model_prefix):
+    # Update the Model name and filepath
+    data_input[const.IMODEL_FN] = model_prefix + data_input[const.IMODEL_FN]
+    data_input[const.IMODEL_FP] = data_input[const.IFOLDER_KEY] + data_input[const.IMODEL_FN]
+    return data_input
+
 def filterProdEnviroment(data_input):
     data_input[const.PROD_ENVIROMENT_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterAutoCreatedRecord'
 
@@ -22,6 +28,8 @@ def filterProdEnviroment(data_input):
     # It recreates the file if it is present
     df.to_csv(data_input[const.PROD_ENVIROMENT_FILTERED_FILE], index=False, encoding='utf-8')
     logging.info('Prod data filtered file created')
+
+    data_input = updateModelNmAndFilePath(data_input, "ProdFilteredModel_")
     return data_input
 
 
@@ -48,8 +56,9 @@ def filterNonMarketingData(data_input):
     # It recreates the file if it is present
     df.to_csv (data_input[const.NON_MARKETING_FILTERED_FILE], index=False, encoding='utf-8')
     logging.info("Non Marketing file created")
-    return data_input;
 
+    data_input = updateModelNmAndFilePath(data_input, "NonMarketingFilteredModel_")
+    return data_input;
 
 # ----------------------------------------------------------------------------------------------------------
 def __main__():
