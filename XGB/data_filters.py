@@ -23,7 +23,7 @@ def filterProdEnviroment(data_input, training_file):
     for df in pd.read_csv (training_file, skiprows=0, header=0, chunksize=READ_CHUNK_SIZE):
         logging.info ("Chunk shape " + str (df.shape))
 
-        convert_datatype = {'impressions': 'int'}
+        convert_datatype = {'impressions': 'float'}
         df = df.astype(convert_datatype)
         # Filter the placements created by the Prod enviroment for detail page
         filter = df['display_name'].str.startswith ('A+')
@@ -56,7 +56,7 @@ def filterNonMarketingData(data_input, training_file):
     for df in pd.read_csv (training_file, skiprows=0, header=0, chunksize=READ_CHUNK_SIZE):
         logging.info ("Full file shape " + str (df.shape))
 
-        convert_datatype = {'impressions': 'int'}
+        convert_datatype = {'impressions': 'float'}
         df = df.astype(convert_datatype)
         df = df[~df.component_name.isin(non_marketing_component_names)]
 

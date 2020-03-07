@@ -38,7 +38,7 @@ def exploreFile(filename):
 
 	df = pd.read_csv(filename, skiprows=0, header=0)
 
-	convert_datatype = {'impressions': 'int'}
+	convert_datatype = {'impressions': 'float'}
 	df = df.astype (convert_datatype)
 
 	logging.info("Shape "+str(df.shape))
