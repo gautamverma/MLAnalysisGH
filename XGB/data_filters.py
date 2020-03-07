@@ -20,18 +20,21 @@ def updateModelNmAndFilePath(data_input, model_prefix):
 def filterProdEnviroment(data_input, training_file):
     data_input[const.PROD_ENVIROMENT_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterAutoCreatedRecord'
 
+    chunkcount = 1
     for df in pd.read_csv (training_file, skiprows=0, header=0, chunksize=READ_CHUNK_SIZE):
         logging.info ("Chunk shape " + str (df.shape))
 
-        convert_datatype = {'impressions': 'float'}
-        df = df.astype(convert_datatype)
         # Filter the placements created by the Prod enviroment for detail page
         filter = df['display_name'].str.startswith ('A+')
 
         df = df.mask (filter).dropna ()
         logging.info ("Prod data Filtered file shape " + str (df.shape))
         # It recreates the file if it is present
-        df.to_csv(data_input[const.PROD_ENVIROMENT_FILTERED_FILE], index=False, encoding='utf-8', mode='a')
+        if(chunkcount==1):
+            df.to_csv(data_input[const.PROD_ENVIROMENT_FILTERED_FILE], index=False, encoding='utf-8')
+        else:
+            df.to_csv(data_input[const.PROD_ENVIROMENT_FILTERED_FILE], header=False, index=False, encoding='utf-8', mode='a')
+        chunkcount = chunkcount + 1
 
     logging.info('Prod data filtered file created')
     data_input = updateModelNmAndFilePath(data_input, "ProdFilteredModel_")
@@ -52,19 +55,20 @@ def filterNonMarketingData(data_input, training_file):
                                      'PersonalizedContent','PrefetchResources', 'PrimenowAlertMessage', 'QtipData', 'Remote', 'RpBIA',
                                      'SeoTitleMeta', 'SimpleSnowAnnouncement', 'TimelineCard',
                                      'TypDesktopThankYouRecommendations','WeblabValidation', 'ZergnetWidget', 'audibleCSMMarkerWidget','audibleWebProductSummaries']
-
+    chunkcount = 1
     for df in pd.read_csv (training_file, skiprows=0, header=0, chunksize=READ_CHUNK_SIZE):
         logging.info ("Full file shape " + str (df.shape))
 
-        convert_datatype = {'impressions': 'float'}
-        df = df.astype(convert_datatype)
         df = df[~df.component_name.isin(non_marketing_component_names)]
-
         logging.info ("Filter non markleting chunk shape " + str (df.shape))
 
         # It recreates the file if it is present
-        df.to_csv (data_input[const.NON_MARKETING_FILTERED_FILE], index=False, encoding='utf-8', mode='a')
-        logging.info("Non Marketing chunk created")
+        if (chunkcount == 1):
+            df.to_csv (data_input[const.NON_MARKETING_FILTERED_FILE], index=False, encoding='utf-8')
+        else:
+            df.to_csv (data_input[const.NON_MARKETING_FILTERED_FILE], header=False, index=False, encoding='utf-8',
+                       mode='a')
+        chunkcount = chunkcount + 1
 
     logging.info("Non Marketing full file created")
     data_input = updateModelNmAndFilePath(data_input, "NonMarketingFilteredModel_")
