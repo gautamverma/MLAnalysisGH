@@ -34,7 +34,7 @@ IFILE_PREFIX = "file_prefix"
 IMODEL_FP = "model_filepath"
 IMODEL_FN = "model_filename"
 IMULTIPLE_METRICS_FILES = 'multiple_metric_files'
-IMULTIPLE_TRAINING_FILES = 'multiple_training_files'
+IMULTIPLE_TRAINING_FILE = 'multiple_training_file'
 
 NON_MARKETING_FILTERED_FILE = 'non_marketing_filtered_file'
 PROD_ENVIROMENT_FILTERED_FILE = 'prod_data_filtered_file'
