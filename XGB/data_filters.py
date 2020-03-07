@@ -8,36 +8,36 @@ import pandas as pd
 # Log time-level and message for getting a running estimate
 logging.basicConfig (stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
 
+READ_CHUNK_SIZE = 10000000
+
 def updateModelNmAndFilePath(data_input, model_prefix):
     # Update the Model name and filepath
+    data_input[const.IFILE_PREFIX] = model_prefix
     data_input[const.IMODEL_FN] = model_prefix + data_input[const.IMODEL_FN]
     data_input[const.IMODEL_FP] = data_input[const.IFOLDER_KEY] + data_input[const.IMODEL_FN]
     return data_input
 
-def filterProdEnviroment(data_input):
+def filterProdEnviroment(data_input, training_file):
     data_input[const.PROD_ENVIROMENT_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterAutoCreatedRecord'
 
-    df = pd.read_csv (data_input[const.ITRAINING_FP], skiprows=0, header=0)
-    logging.info ("Full file shape " + str (df.shape))
+    for df in pd.read_csv (training_file, skiprows=0, header=0, chunksize=READ_CHUNK_SIZE):
+        logging.info ("Chunk shape " + str (df.shape))
 
-    # Filter the placements created by the Prod enviroment for detail page
-    filter = df['display_name'].str.startswith ('A+')
+        # Filter the placements created by the Prod enviroment for detail page
+        filter = df['display_name'].str.startswith ('A+')
 
-    df = df.mask (filter).dropna ()
-    logging.info ("Prod data Filtered file shape " + str (df.shape))
-    # It recreates the file if it is present
-    df.to_csv(data_input[const.PROD_ENVIROMENT_FILTERED_FILE], index=False, encoding='utf-8')
+        df = df.mask (filter).dropna ()
+        logging.info ("Prod data Filtered file shape " + str (df.shape))
+        # It recreates the file if it is present
+        df.to_csv(data_input[const.PROD_ENVIROMENT_FILTERED_FILE], index=False, encoding='utf-8', mode='a')
+
     logging.info('Prod data filtered file created')
-
     data_input = updateModelNmAndFilePath(data_input, "ProdFilteredModel_")
     return data_input
 
 
-def filterNonMarketingData(data_input):
+def filterNonMarketingData(data_input, training_file):
     data_input[const.NON_MARKETING_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterNonMarketingContent'
-
-    df = pd.read_csv (data_input[const.ITRAINING_FP], skiprows=0, header=0)
-    logging.info ("Full file shape " + str (df.shape))
 
     non_marketing_component_names = ['AdPlacementsBlackjackATFWidget', 'AdPlacementsDPXWidget', 'AdPlacementsWidget',
                                      'AdSlotWidget', 'AdTechPlacementsBlackjackWidget', 'AdTechPlacementsWidget',
@@ -51,12 +51,17 @@ def filterNonMarketingData(data_input):
                                      'SeoTitleMeta', 'SimpleSnowAnnouncement', 'TimelineCard',
                                      'TypDesktopThankYouRecommendations','WeblabValidation', 'ZergnetWidget', 'audibleCSMMarkerWidget','audibleWebProductSummaries']
 
-    df = df[~df.component_name.isin(non_marketing_component_names)]
-    logging.info ("Filter non markleting file shape " + str (df.shape))
-    # It recreates the file if it is present
-    df.to_csv (data_input[const.NON_MARKETING_FILTERED_FILE], index=False, encoding='utf-8')
-    logging.info("Non Marketing file created")
+    for df in pd.read_csv (training_file, skiprows=0, header=0, chunksize=READ_CHUNK_SIZE):
+        logging.info ("Full file shape " + str (df.shape))
 
+        df = df[~df.component_name.isin(non_marketing_component_names)]
+        logging.info ("Filter non markleting chunk shape " + str (df.shape))
+
+        # It recreates the file if it is present
+        df.to_csv (data_input[const.NON_MARKETING_FILTERED_FILE], index=False, encoding='utf-8', mode='a')
+        logging.info("Non Marketing chunk created")
+
+    logging.info("Non Marketing full file created")
     data_input = updateModelNmAndFilePath(data_input, "NonMarketingFilteredModel_")
     return data_input;
 

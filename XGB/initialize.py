@@ -30,7 +30,6 @@ def prepareInputData(bucket, jsonprefix, base_folder):
         data_input[const.IFILES_KEY] = data[const.IFILES_KEY]
         data_input[const.ISTARTEGY_KEY] = data[const.ISTARTEGY_KEY]
 
-        data_input[const.IMULTIPLE_TRAINING_FILES] = []
         data_input[const.IMULTIPLE_METRICS_FILES] = data[const.IMULTIPLE_METRICS_FILES]
 
         data_input[const.IRESULT_COL_KEY] = data[const.IRESULT_COL_KEY]
@@ -40,6 +39,8 @@ def prepareInputData(bucket, jsonprefix, base_folder):
 
         data_input[const.IFOLDER_KEY] = base_folder
         data_input[const.ITRAINING_FP] = base_folder + '/training_file'
+        data_input[const.const.IMULTIPLE_TRAINING_FILE] = base_folder + '/multi_training_file'
+
         data_input[const.IMODEL_FN] = data[const.IMODEL_FN]
         data_input[const.IMODEL_FP] = base_folder + data[const.IMODEL_FN]
 

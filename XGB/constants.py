@@ -29,6 +29,7 @@ IPARAMS_KEY = 'learning_params'
 ITRAIN_ITERATIONS = 'iterations'
 ICHUNKSIZE_KEY = 'chunksize'
 IOBJECTIVE_KEY = 'objective_key'
+IFILE_PREFIX = "file_prefix"
 
 IMODEL_FP = "model_filepath"
 IMODEL_FN = "model_filename"
