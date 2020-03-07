@@ -38,8 +38,12 @@ def exploreFile(filename):
 
 	df = pd.read_csv(filename, skiprows=0, header=0)
 
+	convert_datatype = {'impressions': 'int'}
+	df = df.astype (convert_datatype)
+
 	logging.info("Shape "+str(df.shape))
 	logging.info(str(df.weblab.value_counts()))
+	logging.info(str(df.impressions.value_counts()))
 
 	columns_to_keep =  numericalCols + categoricalCols
 	df = df[columns_to_keep + ['weblab']]
