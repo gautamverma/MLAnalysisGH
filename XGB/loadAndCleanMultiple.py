@@ -15,12 +15,17 @@ def generateCleanFile(data_input):
         logging.info ("Multiple Training file is already present")
         return
     logging.info (data_input[const.IMULTIPLE_METRICS_FILES])
+    metric_filecount = 1
     for metric_file in data_input[const.IMULTIPLE_METRICS_FILES]:
         data_input[const.IFILES_KEY][0] = metric_file
         df_merged_set = loadAndMerge (data_input)
         logging.info ("Loading and dataset merged. Display columns")
         logging.info (df_merged_set.columns)
         logging.info ("Dataframe Shape " + str (df_merged_set.shape))
-        df_merged_set.to_csv (training_file, index=False, encoding='utf-8', mode='a')
+        if(metric_filecount == 1):
+            df_merged_set.to_csv (training_file, index=False, encoding='utf-8')
+        else:
+            df_merged_set.to_csv (training_file, header=False, index=False, encoding='utf-8', mode='a')
+        metric_filecount = metric_filecount + 1
     logging.info ('File Created')
     return
