@@ -70,6 +70,7 @@ def start_steps(bucket, jsonprefix, base_folder):
     generateCleanFile(data_input)
 
     utils.logBreak()
+    data_input[const.IFILE_PREFIX] = 'full_file';
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.ITRAINING_FP], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_full/")
 
