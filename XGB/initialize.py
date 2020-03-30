@@ -7,7 +7,9 @@ import datetime
 import utils as utils
 import constants as const
 import s3utils as s3utils
-import data_filters as filters
+
+from data_filters import filterProdEnviroment
+from data_filters import filterNonMarketingData
 
 from trainModel import trainXGBModel
 from predication import predictXGBModel
@@ -75,12 +77,12 @@ def start_steps(bucket, jsonprefix, base_folder):
     buildPredicationModel(data_input, data_input[const.ITRAINING_FP], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_full/")
 
     utils.logBreak()
-    data_input = filters.filterProdEnviroment(data_input)
+    data_input = filterProdEnviroment(data_input, data_input[const.ITRAINING_FP])
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.PROD_ENVIROMENT_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_ProdFiltered/")
 
     utils.logBreak()
-    data_input = filters.filterNonMarketingData(data_input)
+    data_input = filterNonMarketingData(data_input, data_input[const.ITRAINING_FP])
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.NON_MARKETING_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_NonMarketingFiltered/")
 

@@ -5,9 +5,9 @@ import sys
 
 import constants as const
 import data_filters as filters
-from .initialize import buildPredicationModel
-from .initialize import prepareInputData
-from .loadAndCleanMultiple import generateCleanFile
+from initialize import buildPredicationModel
+from initialize import prepareInputData
+from loadAndCleanMultiple import generateCleanFile
 
 import utils as utils
 
