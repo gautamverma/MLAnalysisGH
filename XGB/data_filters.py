@@ -21,6 +21,21 @@ def filterProdEnviroment(data_input, training_file):
     data_input[const.PROD_ENVIROMENT_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterAutoCreatedRecord'
 
     chunkcount = 1
+    created_file = data_input[const.PROD_ENVIROMENT_FILTERED_FILE]
+    buildProdFilteredFile (chunkcount, created_file, training_file)
+    data_input = updateModelNmAndFilePath(data_input, "ProdFilteredModel_")
+    return data_input
+
+def filterProdEnviromentFromNonMarketing(data_input, training_file):
+    data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterNonMA_AutoCreatedRecord'
+
+    chunkcount = 1
+    created_file = data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]
+    buildProdFilteredFile (chunkcount, created_file, training_file)
+    data_input = updateModelNmAndFilePath(data_input, "ProdNonMAFilteredModel_")
+    return data_input
+
+def buildProdFilteredFile(chunkcount, created_file, training_file):
     for df in pd.read_csv (training_file, skiprows=0, header=0, chunksize=READ_CHUNK_SIZE):
         logging.info ("Chunk shape " + str (df.shape))
 
@@ -30,15 +45,12 @@ def filterProdEnviroment(data_input, training_file):
         df = df.mask (filter).dropna ()
         logging.info ("Prod data Filtered file shape " + str (df.shape))
         # It recreates the file if it is present
-        if(chunkcount==1):
-            df.to_csv(data_input[const.PROD_ENVIROMENT_FILTERED_FILE], index=False, encoding='utf-8')
+        if (chunkcount == 1):
+            df.to_csv (created_file, index=False, encoding='utf-8')
         else:
-            df.to_csv(data_input[const.PROD_ENVIROMENT_FILTERED_FILE], header=False, index=False, encoding='utf-8', mode='a')
+            df.to_csv (created_file, header=False, index=False, encoding='utf-8', mode='a')
         chunkcount = chunkcount + 1
-
-    logging.info('Prod data filtered file created')
-    data_input = updateModelNmAndFilePath(data_input, "ProdFilteredModel_")
-    return data_input
+    logging.info ('Prod data filtered file created')
 
 
 def filterNonMarketingData(data_input, training_file):

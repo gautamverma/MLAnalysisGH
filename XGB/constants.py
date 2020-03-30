@@ -38,6 +38,7 @@ IMULTIPLE_TRAINING_FILE = 'multiple_training_file'
 
 NON_MARKETING_FILTERED_FILE = 'non_marketing_filtered_file'
 PROD_ENVIROMENT_FILTERED_FILE = 'prod_data_filtered_file'
+PROD_ENVIROMENT_NON_MA_FILTERED_FILE = 'prod_data_and_non_marketing_filtered_file'
 
 #	Example data imput
 #	data_input = {}

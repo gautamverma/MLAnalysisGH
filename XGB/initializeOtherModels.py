@@ -20,15 +20,25 @@ def start_steps(bucket, jsonprefix, base_folder):
         training_file = data_input[const.ITRAINING_FP]
     logging.info ("Train and testing on the " + training_file)
 
+    old_chunk_size = data_input[const.ICHUNKSIZE_KEY]
     utils.logBreak()
     data_input = filters.filterProdEnviroment(data_input, training_file)
     timestamp_value = int (datetime.datetime.now ().timestamp ())
+    data_input[const.ICHUNKSIZE_KEY] = 1000 # As this file has generally less then 100000 rows
     buildPredicationModel(data_input, data_input[const.PROD_ENVIROMENT_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_ProdFiltered/")
 
     utils.logBreak()
+    data_input[const.ICHUNKSIZE_KEY] = old_chunk_size # As it is big
     data_input = filters.filterNonMarketingData(data_input, training_file)
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.NON_MARKETING_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_NonMarketingFiltered/")
+
+    # Build a model for data - (AutoCreated + Non Marketing case )
+    data_input = filters.filterProdEnviromentFromNonMarketing(data_input, data_input[const.NON_MARKETING_FILTERED_FILE])
+    timestamp_value = int (datetime.datetime.now ().timestamp ())
+    data_input[const.ICHUNKSIZE_KEY] = 1000  # As this file has generally less then 100000 rows
+    buildPredicationModel (data_input, data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE],
+                           data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_NonMAProdFiltered/")
 
 def __main__():
     # count the arguments
