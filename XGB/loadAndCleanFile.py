@@ -1,13 +1,12 @@
-import sys
-import pickle
 import logging
+import pickle
+import sys
 from os import path
 
 import boto3
 import constants as const
 import pandas as pd
 import s3utils as s3utils
-import sagemaker
 
 # Log time-level and message for getting a running estimate
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)

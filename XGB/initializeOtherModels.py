@@ -2,8 +2,7 @@ import sys
 import datetime
 import logging
 
-from sys import path
-
+from os import path
 import constants as const
 import data_filters as filters
 from initialize import buildPredicationModel
