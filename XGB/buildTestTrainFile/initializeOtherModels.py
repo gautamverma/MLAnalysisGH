@@ -1,27 +1,29 @@
-import sys
+import datetime
 import datetime
 import logging
 import sys
 
 import constants as const
-import data_filters as filters
-from .initialize import buildPredicationModel
-from .initialize import prepareInputData
-from .loadAndCleanMultiple import generateCleanFile
 
 import utils as utils
+from .loadAndCleanChuckwise import generateCleanFile
+from ..data_filters import filterNonMarketingData
+from ..data_filters import filterProdEnviroment
+from ..initialize import buildPredicationModel
+from ..initialize import prepareInputData
+
 
 def start_steps(bucket, jsonprefix, base_folder):
     data_input = prepareInputData(bucket, jsonprefix, base_folder)
     generateCleanFile(data_input)
 
     utils.logBreak()
-    data_input = filters.filterProdEnviroment(data_input, data_input[const.IMULTIPLE_TRAINING_FILE])
+    data_input = filterProdEnviroment(data_input, data_input[const.IMULTIPLE_TRAINING_FILE])
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.PROD_ENVIROMENT_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_ProdFiltered/")
 
     utils.logBreak()
-    data_input = filters.filterNonMarketingData(data_input, data_input[const.IMULTIPLE_TRAINING_FILE])
+    data_input = filterNonMarketingData(data_input, data_input[const.IMULTIPLE_TRAINING_FILE])
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.NON_MARKETING_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_NonMarketingFiltered/")
 
@@ -40,6 +42,3 @@ def __main__():
 # This is required to call the main function
 if __name__ == "__main__":
     __main__()
-
-
-
