@@ -20,27 +20,28 @@ def updateModelNmAndFilePath(data_input, model_prefix):
 def filterProdEnviroment(data_input, training_file):
     data_input[const.PROD_ENVIROMENT_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterAutoCreatedRecord'
 
-    if path.exists (data_input[const.PROD_ENVIROMENT_FILTERED_FILE]):
-        logging.info (data_input[const.PROD_ENVIROMENT_FILTERED_FILE]+" file is already present")
-        return
-
     chunkcount = 1
     created_file = data_input[const.PROD_ENVIROMENT_FILTERED_FILE]
+    data_input = updateModelNmAndFilePath (data_input, "ProdFilteredModel_")
+    if path.exists (data_input[const.PROD_ENVIROMENT_FILTERED_FILE]):
+        logging.info (data_input[const.PROD_ENVIROMENT_FILTERED_FILE]+" file is already present")
+        return data_input
+
     buildProdFilteredFile (chunkcount, created_file, training_file)
-    data_input = updateModelNmAndFilePath(data_input, "ProdFilteredModel_")
+
     return data_input
 
 def filterProdEnviromentFromNonMarketing(data_input, training_file):
     data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterNonMA_AutoCreatedRecord'
 
-    if path.exists (data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]):
-        logging.info (data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]+" file is already present")
-        return
-
     chunkcount = 1
     created_file = data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]
+    data_input = updateModelNmAndFilePath (data_input, "ProdNonMAFilteredModel_")
+    if path.exists (data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]):
+        logging.info (data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]+" file is already present")
+        return data_input
+
     buildProdFilteredFile (chunkcount, created_file, training_file)
-    data_input = updateModelNmAndFilePath(data_input, "ProdNonMAFilteredModel_")
     return data_input
 
 def buildProdFilteredFile(chunkcount, created_file, training_file):
@@ -63,9 +64,6 @@ def buildProdFilteredFile(chunkcount, created_file, training_file):
 
 def filterNonMarketingData(data_input, training_file):
     data_input[const.NON_MARKETING_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterNonMarketingContent'
-    if path.exists (data_input[const.NON_MARKETING_FILTERED_FILE]):
-        logging.info (data_input[const.NON_MARKETING_FILTERED_FILE]+" file is already present")
-        return
 
     non_marketing_component_names = ['AdPlacementsBlackjackATFWidget', 'AdPlacementsDPXWidget', 'AdPlacementsWidget',
                                      'AdSlotWidget', 'AdTechPlacementsBlackjackWidget', 'AdTechPlacementsWidget',
@@ -79,6 +77,11 @@ def filterNonMarketingData(data_input, training_file):
                                      'SeoTitleMeta', 'SimpleSnowAnnouncement', 'TimelineCard',
                                      'TypDesktopThankYouRecommendations','WeblabValidation', 'ZergnetWidget', 'audibleCSMMarkerWidget','audibleWebProductSummaries']
     chunkcount = 1
+    data_input = updateModelNmAndFilePath(data_input, "NonMarketingFilteredModel_")
+    if path.exists (data_input[const.NON_MARKETING_FILTERED_FILE]):
+        logging.info (data_input[const.NON_MARKETING_FILTERED_FILE]+" file is already present")
+        return data_input
+
     for df in pd.read_csv (training_file, skiprows=0, header=0, chunksize=READ_CHUNK_SIZE):
         logging.info ("Full file shape " + str (df.shape))
 
@@ -94,7 +97,6 @@ def filterNonMarketingData(data_input, training_file):
         chunkcount = chunkcount + 1
 
     logging.info("Non Marketing full file created")
-    data_input = updateModelNmAndFilePath(data_input, "NonMarketingFilteredModel_")
     return data_input;
 
 # ----------------------------------------------------------------------------------------------------------

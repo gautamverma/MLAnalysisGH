@@ -33,6 +33,7 @@ def start_steps(bucket, jsonprefix, base_folder):
     timestamp_value = int (datetime.datetime.now ().timestamp ())
     buildPredicationModel(data_input, data_input[const.NON_MARKETING_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_NonMarketingFiltered/")
 
+    utils.logBreak()
     # Build a model for data - (AutoCreated + Non Marketing case )
     data_input = filters.filterProdEnviromentFromNonMarketing(data_input, data_input[const.NON_MARKETING_FILTERED_FILE])
     timestamp_value = int (datetime.datetime.now ().timestamp ())
