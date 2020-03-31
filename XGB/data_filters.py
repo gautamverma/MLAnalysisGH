@@ -1,8 +1,8 @@
-import sys
 import logging
+import sys
+from os import path
 
 import constants as const
-import numpy as np
 import pandas as pd
 
 # Log time-level and message for getting a running estimate
@@ -20,6 +20,10 @@ def updateModelNmAndFilePath(data_input, model_prefix):
 def filterProdEnviroment(data_input, training_file):
     data_input[const.PROD_ENVIROMENT_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterAutoCreatedRecord'
 
+    if path.exists (data_input[const.PROD_ENVIROMENT_FILTERED_FILE]):
+        logging.info (data_input[const.PROD_ENVIROMENT_FILTERED_FILE]+" file is already present")
+        return
+
     chunkcount = 1
     created_file = data_input[const.PROD_ENVIROMENT_FILTERED_FILE]
     buildProdFilteredFile (chunkcount, created_file, training_file)
@@ -28,6 +32,10 @@ def filterProdEnviroment(data_input, training_file):
 
 def filterProdEnviromentFromNonMarketing(data_input, training_file):
     data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterNonMA_AutoCreatedRecord'
+
+    if path.exists (data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]):
+        logging.info (data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]+" file is already present")
+        return
 
     chunkcount = 1
     created_file = data_input[const.PROD_ENVIROMENT_NON_MA_FILTERED_FILE]
@@ -55,6 +63,9 @@ def buildProdFilteredFile(chunkcount, created_file, training_file):
 
 def filterNonMarketingData(data_input, training_file):
     data_input[const.NON_MARKETING_FILTERED_FILE] = data_input[const.IFOLDER_KEY] + 'filterNonMarketingContent'
+    if path.exists (data_input[const.NON_MARKETING_FILTERED_FILE]):
+        logging.info (data_input[const.NON_MARKETING_FILTERED_FILE]+" file is already present")
+        return
 
     non_marketing_component_names = ['AdPlacementsBlackjackATFWidget', 'AdPlacementsDPXWidget', 'AdPlacementsWidget',
                                      'AdSlotWidget', 'AdTechPlacementsBlackjackWidget', 'AdTechPlacementsWidget',
