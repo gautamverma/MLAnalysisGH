@@ -21,6 +21,9 @@ logging.basicConfig (stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(
 
 def predictXGBModel(data_input, training_file,  xg_reg):
     chunk_accuracy = {}
+
+    test_count = 0
+    sum_accuracy = 0
     full_consfusion_matrix = [[0,0],[0,0]]
 
     YColumns = [data_input[const.IRESULT_COL_KEY]]
@@ -67,12 +70,19 @@ def predictXGBModel(data_input, training_file,  xg_reg):
 
         # Result Analysis for Chunk
         matrix = confusion_matrix (OUTPUT, np.around (predictions))
+        full_consfusion_matrix = [map (sum, zip (*t)) for t in zip (matrix, full_consfusion_matrix)]
+
+        test_count = test_count + 1
         accuracy = accuracy_score (OUTPUT, np.around (predictions))
+        sum_accuracy = sum_accuracy + accuracy
+
         logging.info ('Confusion Matrix : ' + str (matrix))
         logging.info ('Accuracy Score : ' + str (accuracy))
         logging.info ('Report : ')
         logging.info (str (classification_report (OUTPUT, np.around (predictions))))
         chunk_accuracy[chunkcount] = accuracy
         chunkcount = chunkcount + 1
+    logging.info("Approx accuracy: " +str(sum_accuracy/test_count))
+    logging.info(str(full_consfusion_matrix))
     accuracy_fn = data_input[const.IFILE_PREFIX] + "_model_accuracy_score.sav"
     return accuracy_fn, utils.saveDataOnDisk (chunk_accuracy, data_input[const.IFOLDER_KEY] + accuracy_fn)
