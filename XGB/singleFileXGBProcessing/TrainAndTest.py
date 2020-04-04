@@ -42,14 +42,14 @@ def trainXGBModel(data_input, training_filepath):
 	Y, X = df.iloc[:, 0], df.iloc[:, 1:]
 	X_train, X_test, y_train, y_test = train_test_split (X, Y, test_size=0.2, random_state=123)
 
-	numeric_data = X_train[:,0:len(numericalCols)+1]
-	one_hot_encoded = one_hot_encoder.transform(X_train[:,len(numericalCols)+1:])
+	numeric_data = X_train.iloc[:,0:len(numericalCols)]
+	one_hot_encoded = one_hot_encoder.transform(X_train.iloc[:,len(numericalCols):])
 	d_train = xgb.DMatrix (np.column_stack ((numeric_data, one_hot_encoded)), label=y_train)
 
 	xg_reg = xgb.train(data_input[constants.IPARAMS_KEY], d_train, data_input[constants.ITRAIN_ITERATIONS])
 
-	numeric_data = y_train[:len(numericalCols)+1]
-	one_hot_encoded = one_hot_encoder.transform(y_train[len(numericalCols)+1:])
+	numeric_data = y_train.iloc[:,0:len(numericalCols)]
+	one_hot_encoded = one_hot_encoder.transform(y_train.iloc[:,len(numericalCols):])
 	d_test = xgb.DMatrix(np.column_stack ((numeric_data, one_hot_encoded)))
 	preds = xg_reg.predict(d_test)
 
