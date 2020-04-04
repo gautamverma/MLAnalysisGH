@@ -38,10 +38,8 @@ def trainXGBModel(data_input, training_filepath):
 		lambda row: callFunctionByName (row, data_input[constants.IRESULT_FUNCTION]), axis=1)
 
 	df = df[columns_to_keep]
-
+	logging.info("Columns " + df.columns)
 	Y, X = df.iloc[:, 0], df.iloc[:, 1:]
-	logging.info ("Columns of X " + X.columns)
-	logging.info ("Columns of Y " + Y.columns)
 	X_train, X_test, y_train, y_test = train_test_split (X, Y, test_size=0.2, random_state=123)
 
 	numeric_data = X_train[:,0:len(numericalCols)+1]
