@@ -40,12 +40,13 @@ def trainXGBModel(data_input, training_filepath):
 	df = df[columns_to_keep]
 
 	Y, X = df.iloc[:, 0], df.iloc[:, 1:]
+	logging.info ("Columns of X " + X.columns)
+	logging.info ("Columns of Y " + Y.columns)
 	X_train, X_test, y_train, y_test = train_test_split (X, Y, test_size=0.2, random_state=123)
 
-	numeric_data = X_train[:len(numericalCols)+1]
-	one_hot_encoded = one_hot_encoder.transform(X_train[len(numericalCols)+1:])
+	numeric_data = X_train[:,0:len(numericalCols)+1]
+	one_hot_encoded = one_hot_encoder.transform(X_train[:,len(numericalCols)+1:])
 	d_train = xgb.DMatrix (np.column_stack ((numeric_data, one_hot_encoded)), label=y_train)
-
 
 	xg_reg = xgb.train(data_input[constants.IPARAMS_KEY], d_train, data_input[constants.ITRAIN_ITERATIONS])
 
