@@ -48,8 +48,8 @@ def trainXGBModel(data_input, training_filepath):
 
 	xg_reg = xgb.train(data_input[constants.IPARAMS_KEY], d_train, data_input[constants.ITRAIN_ITERATIONS])
 
-	numeric_data = y_train.iloc[:,0:len(numericalCols)]
-	one_hot_encoded = one_hot_encoder.transform(y_train.iloc[:,len(numericalCols):])
+	numeric_data = X_test.iloc[:,0:len(numericalCols)]
+	one_hot_encoded = one_hot_encoder.transform(X_test.iloc[:,len(numericalCols):])
 	d_test = xgb.DMatrix(np.column_stack ((numeric_data, one_hot_encoded)))
 	preds = xg_reg.predict(d_test)
 
