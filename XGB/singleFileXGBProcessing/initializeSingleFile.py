@@ -16,9 +16,10 @@ def start_steps(bucket, jsonprefix, base_folder):
 
     xgb_model = trainXGBModel(data_input, data_input[constants.ITRAINING_FP])
 
-    # Model present then load and return
-    utils.saveDataOnDisk (xgb_model, str(datetime.datetime.now().timestamp()) + data_input[constants.IMODEL_FN],
-                        data_input[constants.IMODEL_FP])
+    # Model present then save the timeprefix and save it
+    data_input[constants.IMODEL_FN] = str(datetime.datetime.now().timestamp()) + data_input[constants.IMODEL_FN]
+    data_input[constants.IMODEL_FP] = base_folder + data_input[constants.IMODEL_FN]
+    utils.saveDataOnDisk (xgb_model, data_input[constants.IMODEL_FP])
 
 def __main__():
     # count the arguments
