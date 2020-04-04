@@ -103,5 +103,5 @@ if __name__ == "__main__":
     __main__()
 
 #Example Command
-#nohup python3 -u initialize.py deep-learning-fe-datasets
+#nohup python3 -u initializeSingleFile.py deep-learning-fe-datasets
 # january/15Jan15Feb/input.json /home/ec2-user/SageMaker/FE-15Jan15Feb-dataset/ > FE-BinaryRun1March &
