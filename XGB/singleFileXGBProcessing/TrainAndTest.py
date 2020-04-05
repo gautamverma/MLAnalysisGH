@@ -54,9 +54,9 @@ def trainXGBModel(data_input, training_filepath):
 
 	logging.info(str(data_input[constants.IPARAMS_KEY]))
 	logging.info('Confusion Matrix : ')
-	logging.info(+ str (matrix))
-	logging.info ('Accuracy Score : ' + str (accuracy))
-	logging.info (str(classification_report (y_test, np.around (preds))))
+	logging.info(str(matrix))
+	logging.info('Accuracy Score : ' + str (accuracy))
+	logging.info(str(classification_report (y_test, np.around (preds))))
 	logging.info("\n\n\n")
 
 	return xg_reg
