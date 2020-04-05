@@ -29,16 +29,12 @@ def trainXGBModel(data_input, training_filepath):
 
 	columns_to_keep = YColumns + numericalCols + categoricalCols
 	one_hot_encoder, shapeTuple = utils.buildOneHotEncoder(training_filepath , categoricalCols)
-	logging.info('One hot encoder is ready')
-
-	logging.info("Training for  " + data_input[constants.IOBJECTIVE_KEY])
 
 	df = pd.read_csv(training_filepath, skiprows=0, header=0)
 	df[data_input[constants.IRESULT_COL_KEY]] = df.apply(
 		lambda row: callFunctionByName (row, data_input[constants.IRESULT_FUNCTION]), axis=1)
 
 	df = df[columns_to_keep]
-	logging.info("Columns " + df.columns)
 	Y, X = df.iloc[:, 0], df.iloc[:, 1:]
 	X_train, X_test, y_train, y_test = train_test_split (X, Y, test_size=0.2, random_state=123)
 
@@ -56,10 +52,12 @@ def trainXGBModel(data_input, training_filepath):
 	accuracy = accuracy_score(y_test, np.around(preds))
 	matrix = confusion_matrix(y_test, np.around (preds))
 
-	logging.info ('Confusion Matrix : ' + str (matrix))
+	logging.info(str(data_input[constants.IPARAMS_KEY]))
+	logging.info('Confusion Matrix : ')
+	logging.info(+ str (matrix))
 	logging.info ('Accuracy Score : ' + str (accuracy))
-	logging.info ('Report : ')
-	logging.info (str (classification_report (y_test, np.around (preds))))
+	logging.info (str(classification_report (y_test, np.around (preds))))
+	logging.info("\n\n\n")
 
 	return xg_reg
 

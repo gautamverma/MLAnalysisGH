@@ -9,7 +9,7 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 
 # Prefix will also contain the filename which we build when calling it Path(prefix).stem
 def downloadFileFromS3(s3, bucket, prefix, filepath):
-	logging.info("Downloading :: bucket:prefix"+bucket+":"+prefix)
+	logging.info("Downloading :: bucket:prefix  "+bucket+":"+prefix)
 	if(path.exists(filepath)):
 		logging.info(filepath + " already exists")
 		return filepath
