@@ -26,12 +26,12 @@ def hyperParametersTuning(bucket, jsonprefix, base_folder):
     data_input = prepareInputData (bucket, jsonprefix, base_folder)
 
     learning_parameters = {
-        "objective": "binary:logistic",
-        "colsample_bytree": 0.3,
-        "learning_rate": 0.1,
-        "max_depth": 8,
-        "alpha": 5,
-        "n_estimators": 50
+        'objective': 'binary:logistic',
+        'colsample_bytree': 0.3,
+        'learning_rate': 0.1,
+        'max_depth': 8,
+        'alpha': 5,
+        'n_estimators': 50
     }
 
     learning_rate_vals = np.arange(0.1, 0.5, 0.02)
