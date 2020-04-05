@@ -41,9 +41,9 @@ def hyperParametersTuning(bucket, jsonprefix, base_folder):
     for learning_rate in learning_rate_vals:
         for max_depth in max_depth_vals:
             for n_estimators in n_estimators_vals:
-                learning_parameters.max_depth = max_depth
-                learning_parameters.n_estimators = n_estimators
-                learning_parameters.learning_rate = learning_rate
+                learning_parameters['max_depth'] = max_depth
+                learning_parameters['n_estimators'] = n_estimators
+                learning_parameters['learning_rate'] = learning_rate
                 data_input[constants.IPARAMS_KEY] = learning_parameters
                 start_steps(data_input, base_folder)
     return
