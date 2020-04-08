@@ -28,7 +28,7 @@ def trainXGBModel(data_input, training_filepath):
 	# Initialize the range to test the different parameters
 	learning_rate_vals = np.arange (0.1, 0.5, 0.02)
 	max_depth_vals = np.arange (8, 24, 1)
-	n_estimators_vals = np.arange (50, 500, 10)
+	n_estimators_vals = np.arange (100, 500, 100)
 
 	# Predication will be always on 1 result col
 	YColumns = [data_input[constants.IRESULT_COL_KEY]]
