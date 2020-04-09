@@ -30,9 +30,9 @@ def trainXGBModel(data_input, training_filepath):
 	max_depth_vals = np.arange (3, 12, 1) # High Depth Tress are fit to that dataset
 	# Minimum loss reduction required to make a further partition on a leaf node of the tree.
 	# The larger min_split_loss/gamma is, the more conservative the algorithm will be.
-	min_split_loss_vals = np.arange (0, 10, 1)
+	min_split_loss_vals = np.arange(0, 10, 1)
 
-	colsample_bytree_vals = np.arrange(0.1, 0.8, 0.1)
+	colsample_bytree_vals = np.arange(0.1, 0.8, 0.1)
 
 	# Predication will be always on 1 result col
 	YColumns = [data_input[constants.IRESULT_COL_KEY]]
