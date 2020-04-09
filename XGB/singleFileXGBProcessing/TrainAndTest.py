@@ -27,8 +27,12 @@ def trainXGBModel(data_input, training_filepath):
 
 	# Initialize the range to test the different parameters
 	learning_rate_vals = np.arange (0.1, 0.5, 0.02)
-	max_depth_vals = np.arange (8, 24, 1)
-	n_estimators_vals = np.arange (100, 500, 100)
+	max_depth_vals = np.arange (3, 12, 1) # High Depth Tress are fit to that dataset
+	# Minimum loss reduction required to make a further partition on a leaf node of the tree.
+	# The larger min_split_loss/gamma is, the more conservative the algorithm will be.
+	min_split_loss_vals = np.arange (0, 10, 1)
+
+	colsample_bytree_vals = np.arrange(0.1, 0.8, 0.1)
 
 	# Predication will be always on 1 result col
 	YColumns = [data_input[constants.IRESULT_COL_KEY]]
@@ -48,43 +52,45 @@ def trainXGBModel(data_input, training_filepath):
 	learning_parameters = data_input[constants.IPARAMS_KEY]
 	for learning_rate in learning_rate_vals:
 		for max_depth in max_depth_vals:
-			for n_estimators in n_estimators_vals:
-				learning_parameters['max_depth'] = max_depth
-				learning_parameters['n_estimators'] = n_estimators
-				learning_parameters['learning_rate'] = learning_rate
-				data_input[constants.IPARAMS_KEY] = learning_parameters
+			for min_split_loss in min_split_loss_vals:
+				for colsample_bytree in colsample_bytree_vals:
+					# Set the params and tune the job
+					learning_parameters['max_depth'] = max_depth
+					learning_parameters['learning_rate'] = learning_rate
+					learning_parameters['min_split_loss'] = min_split_loss
+					learning_parameters['colsample_bytree'] = colsample_bytree
 
-				X_train, X_test, y_train, y_test = train_test_split (X, Y, test_size=0.2, random_state=123)
+					data_input[constants.IPARAMS_KEY] = learning_parameters
 
-				numeric_data = X_train.iloc[:,0:len(numericalCols)]
-				one_hot_encoded = one_hot_encoder.transform(X_train.iloc[:,len(numericalCols):])
-				d_train = xgb.DMatrix (np.column_stack ((numeric_data, one_hot_encoded)), label=y_train)
+					X_train, X_test, y_train, y_test = train_test_split (X, Y, test_size=0.2, random_state=123)
 
-				xg_reg = xgb.train(data_input[constants.IPARAMS_KEY], d_train, data_input[constants.ITRAIN_ITERATIONS])
+					numeric_data = X_train.iloc[:,0:len(numericalCols)]
+					one_hot_encoded = one_hot_encoder.transform(X_train.iloc[:,len(numericalCols):])
+					d_train = xgb.DMatrix (np.column_stack ((numeric_data, one_hot_encoded)), label=y_train)
 
-				numeric_data = X_test.iloc[:,0:len(numericalCols)]
-				one_hot_encoded = one_hot_encoder.transform(X_test.iloc[:,len(numericalCols):])
-				d_test = xgb.DMatrix(np.column_stack ((numeric_data, one_hot_encoded)))
-				preds = xg_reg.predict(d_test)
+					xg_reg = xgb.train(data_input[constants.IPARAMS_KEY], d_train, data_input[constants.ITRAIN_ITERATIONS])
 
-				accuracy = accuracy_score(y_test, np.around(preds))
-				matrix = confusion_matrix(y_test, np.around (preds))
+					numeric_data = X_test.iloc[:,0:len(numericalCols)]
+					one_hot_encoded = one_hot_encoder.transform(X_test.iloc[:,len(numericalCols):])
+					d_test = xgb.DMatrix(np.column_stack ((numeric_data, one_hot_encoded)))
+					preds = xg_reg.predict(d_test)
 
-				logging.info(str(data_input[constants.IPARAMS_KEY]))
-				logging.info('Confusion Matrix : ')
-				logging.info(str(matrix))
-				logging.info('Accuracy Score : ' + str (accuracy))
-				logging.info(str(classification_report (y_test, np.around (preds))))
+					accuracy = accuracy_score(y_test, np.around(preds))
+					matrix = confusion_matrix(y_test, np.around (preds))
 
-				if(otherValues['accuracy_value']<accuracy):
-					xgb_model = xg_reg
-					otherValues['accuracy_value'] = accuracy
-					otherValues['Confusion_Matrix'] = matrix
-					otherValues['Classification_report'] = classification_report(y_test, np.around (preds))
+					logging.info(str(data_input[constants.IPARAMS_KEY]) +" : " + str(accuracy))
+					if(otherValues['accuracy_value']<accuracy):
+						xgb_model = xg_reg
+						otherValues['accuracy_value'] = accuracy
+						otherValues['Confusion_Matrix'] = matrix
+						otherValues['Classification_report'] = classification_report(y_test, np.around (preds))
+				logging.info("\n")
 			logging.info("\n")
 		logging.info('\n')
 	logging.info('\n')
 
 	logging.info('Best Model values')
-	logging.info('')
+	logging.info('Accuracy '+str(otherValues['accuracy_value']))
+	logging.info('Matrix ' + str(otherValues['Confusion_Matrix']))
+	logging.info('Classification Report ' + str(otherValues['Classification_report']))
 	return xgb_model
