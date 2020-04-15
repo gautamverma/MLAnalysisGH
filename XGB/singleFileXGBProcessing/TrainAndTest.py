@@ -40,12 +40,13 @@ def trainXGBModel(data_input, training_filepath):
 	categoricalCols = data_input[constants.ICATEGORICAL_COLS]
 
 	columns_to_keep = YColumns + numericalCols + categoricalCols
-	one_hot_encoder, shapeTuple = utils.buildOneHotEncoder(training_filepath , categoricalCols)
+	one_hot_encoder, shapeTuple = utils.buildOneHotEncoder(training_filepath, categoricalCols)
 
 	df = pd.read_csv(training_filepath, skiprows=0, header=0)
 	df[data_input[constants.IRESULT_COL_KEY]] = df.apply(
 		lambda row: callFunctionByName (row, data_input[constants.IRESULT_FUNCTION]), axis=1)
 
+	df = df.where(df['weblab'] == "missing").dropna()
 	df = df[columns_to_keep]
 	Y, X = df.iloc[:, 0], df.iloc[:, 1:]
 
