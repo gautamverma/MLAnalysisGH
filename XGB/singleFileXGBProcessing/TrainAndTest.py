@@ -46,6 +46,10 @@ def trainXGBModel(data_input, training_filepath):
 	df[data_input[constants.IRESULT_COL_KEY]] = df.apply(
 		lambda row: callFunctionByName (row, data_input[constants.IRESULT_FUNCTION]), axis=1)
 
+	df['metrics_day'] = pd.to_datetime(df['metrics_day'], format='%Y-%m-%d')
+	df['start_date'] = pd.to_datetime(df['start_date'], format='%Y %m %d %H:%M:%S')
+	df['days'] = (df['metrics_day'] - df['start_date']).dt.days
+
 	df = df.where(df['weblab'] == "missing").dropna()
 	df = df[columns_to_keep]
 	Y, X = df.iloc[:, 0], df.iloc[:, 1:]
