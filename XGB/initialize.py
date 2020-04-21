@@ -20,7 +20,7 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 
 def prepareInputData(bucket, jsonprefix, base_folder):
     s3 = boto3.resource ('s3')
-    filepath = s3utils.downloadFileFromS3(s3, bucket, jsonprefix, base_folder + 'input.json')
+    filepath = s3utils.downloadfilefroms3(s3, bucket, jsonprefix, base_folder + 'input.json')
 
     data_input = {}
     with open(filepath, "r") as input_file:

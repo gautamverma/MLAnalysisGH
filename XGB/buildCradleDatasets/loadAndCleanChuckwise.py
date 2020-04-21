@@ -51,14 +51,14 @@ def loadAndMerge(data_input, df1):
     files = data_input[const.IFILES_KEY]
     base_folder = data_input[const.IFOLDER_KEY]
 
-    file2 = s3utils.downloadFileFromS3 (s3, bucket, prefix + files[1], base_folder + files[1])
+    file2 = s3utils.downloadfilefroms3 (s3, bucket, prefix + files[1], base_folder + files[1])
     df2 = pd.read_csv (file2, skiprows=0, header=0)
     logging.info (df2.columns)
 
     df2[['guarantee_percentage']] = df2[['guarantee_percentage']].fillna (value=const.NUMERIC_FILLER)
     logging.info ('Cleaned the placement metadata file');
 
-    file3 = s3utils.downloadFileFromS3 (s3, bucket, prefix + files[2], base_folder + files[2])
+    file3 = s3utils.downloadfilefroms3 (s3, bucket, prefix + files[2], base_folder + files[2])
     df3 = pd.read_csv (file3, skiprows=0, header=0)
     logging.info (df3.columns)
 
@@ -67,7 +67,7 @@ def loadAndMerge(data_input, df1):
     df3[['component_display_name']] = df3[['component_display_name']].fillna (value=const.CONSTANT_FILLER)
     logging.info ("Clean the content metadata file")
 
-    file4 = s3utils.downloadFileFromS3 (s3, bucket, prefix + files[3], base_folder + files[3])
+    file4 = s3utils.downloadfilefroms3 (s3, bucket, prefix + files[3], base_folder + files[3])
     df4 = pd.read_csv (file4, skiprows=0, header=0)
     logging.info (df4.columns)
 
@@ -82,7 +82,7 @@ def loadAndMerge(data_input, df1):
     df4 = label_column (df4, base_folder, 'container_id')
     logging.info ("Clean the container_id column of placement properties file")
 
-    file5 = s3utils.downloadFileFromS3 (s3, bucket, prefix + files[4], base_folder + files[4])
+    file5 = s3utils.downloadfilefroms3 (s3, bucket, prefix + files[4], base_folder + files[4])
     df5 = pd.read_csv (file5, skiprows=0, header=0)
     logging.info (df5.columns)
 
@@ -113,7 +113,7 @@ def generateCleanFile(data_input):
     prefix = data_input[const.IPREFIX_KEY]
     files = data_input[const.IFILES_KEY]
     base_folder = data_input[const.IFOLDER_KEY]
-    file1 = s3utils.downloadFileFromS3 (s3, bucket, prefix + data_input[const.IFILES_KEY][0], base_folder + files[0])
+    file1 = s3utils.downloadfilefroms3 (s3, bucket, prefix + data_input[const.IFILES_KEY][0], base_folder + files[0])
     for chunk in pd.read_csv (file1, chunksize=TENMILLION, skiprows=0, header=0):
         logging.info (chunk.columns)
         df_merged_set = loadAndMerge (data_input, chunk)
