@@ -2,7 +2,8 @@ import datetime
 import logging
 import sys
 
-import constants as const
+sys.path.append('..')
+from ..utility import constants
 
 import utils as utils
 from .loadAndCleanChuckwise import generateCleanFile
@@ -17,14 +18,14 @@ def start_steps(bucket, jsonprefix, base_folder):
     generateCleanFile(data_input)
 
     utils.logBreak()
-    data_input = filterProdEnviroment(data_input, data_input[const.IMULTIPLE_TRAINING_FILE])
-    timestamp_value = int (datetime.datetime.now ().timestamp ())
-    buildPredicationModel(data_input, data_input[const.PROD_ENVIROMENT_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_ProdFiltered/")
+    data_input = filterProdEnviroment(data_input, data_input[constants.IMULTIPLE_TRAINING_FILE])
+    timestamp_value = int (datetime.datetime.now().timestamp())
+    buildPredicationModel(data_input, data_input[constants.PROD_ENVIROMENT_FILTERED_FILE], data_input[constants.IPREFIX_KEY] + str (timestamp_value) + "_ProdFiltered/")
 
     utils.logBreak()
-    data_input = filterNonMarketingData(data_input, data_input[const.IMULTIPLE_TRAINING_FILE])
+    data_input = filterNonMarketingData(data_input, data_input[constants.IMULTIPLE_TRAINING_FILE])
     timestamp_value = int (datetime.datetime.now ().timestamp ())
-    buildPredicationModel(data_input, data_input[const.NON_MARKETING_FILTERED_FILE], data_input[const.IPREFIX_KEY] + str (timestamp_value) + "_NonMarketingFiltered/")
+    buildPredicationModel(data_input, data_input[constants.NON_MARKETING_FILTERED_FILE], data_input[constants.IPREFIX_KEY] + str (timestamp_value) + "_NonMarketingFiltered/")
 
 def __main__():
     # count the arguments
