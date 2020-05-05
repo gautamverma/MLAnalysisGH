@@ -6,7 +6,7 @@ from os import path
 import boto3
 import constants as const
 import pandas as pd
-from XGB import s3utils
+import s3utils as s3utils
 
 # Log time-level and message for getting a running estimate
 logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
