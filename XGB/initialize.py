@@ -6,7 +6,7 @@ import datetime
 
 import utils as utils
 import constants as const
-import s3utils as s3utils
+from XGB import s3utils
 
 from data_filters import filterProdEnviroment
 from data_filters import filterNonMarketingData
@@ -20,7 +20,7 @@ logging.basicConfig(stream=sys.stdout, format='%(asctime)s - %(levelname)s - %(m
 
 def prepareInputData(bucket, jsonprefix, base_folder):
     s3 = boto3.resource ('s3')
-    filepath = s3utils.downloadfilefroms3(s3, bucket, jsonprefix, base_folder + 'input.json')
+    filepath = s3utils.downloadFileFromS3(s3, bucket, jsonprefix, base_folder + 'input.json')
 
     data_input = {}
     with open(filepath, "r") as input_file:
@@ -57,7 +57,7 @@ def buildPredicationModel(data_input, training_file, s3_prefix):
     xgb_model = trainXGBModel (data_input, training_file)
 
     # Save Model on the disk
-    utils.saveDataOnDisk (xgb_model, data_input[const.IMODEL_FP])
+    utils.saveDataOnDisk(xgb_model, data_input[const.IMODEL_FP])
     s3utils.uploadFiletoS3 (data_input[const.IBUCKET_KEY], s3_prefix + data_input[const.IMODEL_FN],
                             data_input[const.IMODEL_FP])
 
