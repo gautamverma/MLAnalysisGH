@@ -6,7 +6,7 @@ import datetime
 
 import utils as utils
 import constants as const
-from XGB import s3utils
+import s3utils as s3utils
 
 from data_filters import filterProdEnviroment
 from data_filters import filterNonMarketingData
