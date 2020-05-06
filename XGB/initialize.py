@@ -50,6 +50,7 @@ def prepareInputData(bucket, jsonprefix, base_folder):
         data_input[const.ICHUNKSIZE_KEY] = data[const.ICHUNKSIZE_KEY]
         data_input[const.ITRAIN_ITERATIONS] = data[const.ITRAIN_ITERATIONS]
         data_input[const.IOBJECTIVE_KEY] = data[const.IOBJECTIVE_KEY]
+        data_input[const.LEARNING_TYPE] = data[const.LEARNING_TYPE]
 
     return data_input
 
