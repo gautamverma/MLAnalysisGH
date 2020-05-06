@@ -42,7 +42,7 @@ role = sagemaker.get_execution_role()
 bucket = sagemaker.Session().default_bucket()
 
 # Download the file
-input_bucket = 'sagemaker-campaign-predication-input'
+input_bucket = 'sagemaker-campaign-predication_package-input'
 prefix = 'FE-18Jan-3FebTrainingFile/18January03FebTrainingFile'
 training_filename='training_file'
 

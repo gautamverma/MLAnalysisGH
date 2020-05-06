@@ -235,7 +235,7 @@ def trainModel(learning_rate, max_depth, training_file_name, base_folder, model_
 	impression_count = int(impression_count)
 	#Model present then load and predict
 	if model_filename is not None and path.exists(model_filename):
-		logging.info("Model file present. Skipping to predication::")
+		logging.info("Model file present. Skipping to predication_package::")
 		xg_reg = pickle.load(open(model_filename, 'rb'))
 		predict(training_file_name, one_hot_encoder, xg_reg, impression_count)
 		return

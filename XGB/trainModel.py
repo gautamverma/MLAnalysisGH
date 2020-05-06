@@ -25,7 +25,7 @@ def trainXGBModel(data_input, training_filepath):
 	# Model present then load and return
 	model_filepath = data_input[const.IMODEL_FP]
 	if model_filepath is not None and path.exists(model_filepath):
-		logging.info("Model file present. Skipping to predication::")
+		logging.info("Model file present. Skipping to predication_package::")
 		xg_reg = pickle.load(open(model_filepath, 'rb'))
 		return xg_reg
 
