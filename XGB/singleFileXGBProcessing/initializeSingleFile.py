@@ -1,20 +1,23 @@
 import datetime
 # To prepare the other modules
 import sys
-
 sys.path.append('..')
 
 from utility import constants
 from utility import utils
 from initialize import prepareInputData
 from TrainAndTest import trainXGBModel
-
+from trainAndTestRegression import trainXGBRegression
 
 def start_steps(data_input, base_folder):
 
-    xgb_model = trainXGBModel(data_input, data_input[constants.ITRAINING_FP])
+    xgb_model = None
+    if data_input[constants.LEARNING_TYPE] is not None and data_input[constants.LEARNING_TYPE] == constants.REGRESSION:
+        xgb_model = trainXGBRegression(data_input, data_input[constants.ITRAINING_FP])
+    else:
+        xgb_model = trainXGBModel(data_input, data_input[constants.ITRAINING_FP])
 
-    # Model present then save the timeprefix and save it
+    # Model present then save the time prefix and save it
     data_input[constants.IMODEL_FN] = str(int(datetime.datetime.now().timestamp())) + data_input[constants.IMODEL_FN]
     data_input[constants.IMODEL_FP] = base_folder + data_input[constants.IMODEL_FN]
     utils.saveDataOnDisk (xgb_model, data_input[constants.IMODEL_FP])

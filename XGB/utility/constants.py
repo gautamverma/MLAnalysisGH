@@ -1,6 +1,9 @@
 # Batch size of 10000
 CHUNKSIZE = 250000
 
+REGRESSION = 'regression'
+CLASSIFICATION = 'classification'
+
 # Default value ACTUAL SIZE 75%
 TRAIN_ITERATION = 30
 TRAIN_MOD_COUNT = 10
@@ -39,6 +42,8 @@ IMULTIPLE_TRAINING_FILE = 'multiple_training_file'
 NON_MARKETING_FILTERED_FILE = 'non_marketing_filtered_file'
 PROD_ENVIROMENT_FILTERED_FILE = 'prod_data_filtered_file'
 PROD_ENVIROMENT_NON_MA_FILTERED_FILE = 'prod_data_and_non_marketing_filtered_file'
+
+LEARNING_TYPE = 'learning_type'
 
 #	Example data imput
 #	data_input = {}

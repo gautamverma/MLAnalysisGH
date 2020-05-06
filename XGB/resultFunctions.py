@@ -51,4 +51,6 @@ def callFunctionByName(row, functionName):
 		return useDigitClassifier6ValueSet(row)
 	elif (functionName == 'useDigitClassifier7ValueSet'):
 		return useDigitClassifier7ValueSet(row)
+	elif(functionName == 'useImpressions')
+		return row['impressions']
 	return use10Classifer(row)
